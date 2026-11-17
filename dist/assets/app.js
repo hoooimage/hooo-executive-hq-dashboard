@@ -1,5 +1,5 @@
 const now = new Date();
-const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'90天目標', workGoal:'', workCategory:'', financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
+const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
 const LIVE_ENDPOINT = String(window.HOOO_DATA_ENDPOINT || '').trim();
 const WRITE_ENDPOINT = String(window.HOOO_WRITE_ENDPOINT || LIVE_ENDPOINT).trim();
 
@@ -12,9 +12,9 @@ const seed = {
   ],
   daily: [
     ['日期','主管','角色','今日最重要事項','目前進展','需要CEO確認','主管建議','狀態','相關任務ID'],
-    ['2026-11-17','Alex','CSO','完成北極星→年度→90天→30天目標第一版','已建立公司作戰地圖與五大年度目標草案','願景文字、北極星口徑與年度數字','一年只守一個北極星；90天只保留一個主戰場','待CEO確認','T-001,T-002,T-009'],
-    ['2026-11-17','Sophie','CGO','把自媒體、LINE、Idealflow納入同一套成長系統','已新增自媒體與LINE任務，並連到90天與30天目標','LINE權限、CEO內容語氣與可拍攝時段','自媒體負責被看見、LINE負責關係培養、Idealflow負責商機追蹤','進行中','T-003,T-004,T-021,T-022'],
-    ['2026-11-17','Daniel','COO','把Dashboard改成公司作戰地圖與每日收件匣','已新增目標階層、每日事項與任務歸屬欄位','CEO最常使用的三個操作入口','所有新事項先進收件匣，再轉成有目標、類別、主責與狀態的任務','進行中','T-017']
+    ['2026-11-17','Alex','CSO','把CEO想法整理為2027量化成果與2026建置順序','已確認2027每月營收20萬、每月4位形象顧問客戶、大型企業合作與季度輕量企業案','北極星仍需再討論，不先把營收或粉絲直接當北極星','2026先把能賣、能交付、能追蹤的系統建好；2027再追穩定成長','進行中','T-002,T-023,T-024,T-029'],
+    ['2026-11-17','Sophie','CGO','把2027粉絲與客戶目標拆成可追蹤的成長路徑','IG與Facebook各2,000的年度目標已確認；下一步盤點目前基準與內容節奏','需要目前IG、Facebook粉絲數、過去發文頻率與可持續產能','粉絲要與詢問、名單及付費轉換一起追，避免只累積表面數字','進行中','T-003,T-021,T-023'],
+    ['2026-11-17','Daniel','COO','啟動AMO陪跑內容模組化的製作與驗收排程','已找到現有AMO資料並拆成主專案、六個子任務及年底里程碑','需要確認AMO案例對外匿名與授權方式','先用現有資料完成第一版，再透過試教修訂，不等待所有內容一次完美','進行中','T-017,T-023,T-025,T-026,T-027,T-028']
   ],
   services: [
     ['服務ID','類別','服務名稱','官網定位／內容','標準價格','計價單位','官網連結','狀態','備註'],
@@ -26,7 +26,8 @@ const seed = {
     ['SVC-006','企業顧問','員工形象與接待訓練','形象、接待、需求探詢與價值說明實作','','依案洽談','https://hoooimage.com/','販售中',''],
     ['SVC-007','企業顧問','主管帶教與陪跑','建立主管帶教與回饋機制','','依案洽談','https://hoooimage.com/','販售中',''],
     ['SVC-008','甜甜圈高球','新手活動體驗','小團體高球體驗與人脈交流','1280','每人／活動','https://hoooimage.com/','販售中',''],
-    ['SVC-009','甜甜圈高球','商務高爾夫初階團班','10堂、每堂2小時，4–8人小班','18800','每人／10堂','https://hoooimage.com/','預售中','']
+    ['SVC-009','甜甜圈高球','商務高爾夫初階團班','10堂、每堂2小時，4–8人小班','18800','每人／10堂','https://hoooimage.com/','預售中',''],
+    ['SVC-010','企業培訓','好圈圈款待力模組課程','把依賴個人熱忱的好服務，變成全門市可學、可做、可帶、可追蹤的款待系統','','2小時體驗／6模組／90天陪跑','','開發中','首版鎖定有實體門市、需要第一線服務一致性的連鎖企業']
   ],
   income: [
     ['收入ID','日期','客戶','專案','服務ID','服務項目','數量','單價','應收金額','已收金額','未收金額','收款方式','發票狀態','收款狀態','負責人','相關任務ID','備註'],
@@ -48,7 +49,8 @@ const seed = {
     ['ST-004','B2C產品階梯','個人色彩診斷升級完整形象實戰','SVC-001→SVC-002','轉職、升遷或個人品牌客戶','先用明確診斷降低決策門檻，再升級完整實戰','9,800入門診斷→16,800完整方案→轉介紹','建立穩定每月個人服務成交路徑','完成案例素材、諮詢流程與升級說明；取得4次諮詢','有效詢問、諮詢數、SVC-001成交、升級率','P1','Alex / Sophie','草案','每月成交目標與可投入時段'],
     ['ST-005','B2B產品階梯','企業顧問由診斷走向訓練與主管陪跑','SVC-005→SVC-006→SVC-007','門市、專業服務與高接觸企業','先找問題、再訓練、最後用主管機制確保改變持續','現場診斷→員工訓練→月度主管陪跑','完成1家企業診斷或正式提案','建立一頁式企業階梯、10家名單、3次訪談、1份提案','企業名單、訪談、提案、診斷成交、續約率','P1','Alex / Sophie','草案','企業顧問定價與交付邊界'],
     ['ST-006','社群產品階梯','甜甜圈高球由體驗導入初階團班','SVC-008→SVC-009','想學高球與拓展商務人脈的新手','用輕鬆體驗降低入門焦慮，再承接系統課程與社群','1,280體驗→18,800十堂團班→社群活動','完成一場體驗並累積首班4名預售','建立30位名單、12人報名體驗、8人到場、4人預售','名單、報名、到場、團班預售、每位獲客成本','P2','Alex / Sophie','草案','活動日期、教練容量與開班條件'],
-    ['ST-007','營運基礎','HQ管理決策、Idealflow管理客戶漏斗','全服務','內部團隊與所有客戶機會','每個策略、名單、任務與收支只有一個正式主檔','HQ追蹤目標任務損益；Idealflow追蹤名單與自動跟進','正式專案100%有任務、進度與收支承接','完成漏斗欄位、資料責任與每週檢視節奏','資料完整率、漏斗更新率、逾期任務、收支完整率','P0','Alex / Sophie / Daniel','進行中','Idealflow帳號與串接權限']
+    ['ST-007','營運基礎','HQ管理決策、Idealflow管理客戶漏斗','全服務','內部團隊與所有客戶機會','每個策略、名單、任務與收支只有一個正式主檔','HQ追蹤目標任務損益；Idealflow追蹤名單與自動跟進','正式專案100%有任務、進度與收支承接','完成漏斗欄位、資料責任與每週檢視節奏','資料完整率、漏斗更新率、逾期任務、收支完整率','P0','Alex / Sophie / Daniel','進行中','Idealflow帳號與串接權限'],
+    ['ST-008','產品化主戰場','把AMO陪跑內容轉成可複製的款待模組課程','SVC-010','有實體門市、需要第一線服務一致性的連鎖企業','把依賴個人熱忱的好服務，變成全門市可學、可做、可帶、可追蹤的款待系統','2小時體驗→6模組正式課→90天陪跑；80%標準核心＋20%企業客製','完成六模組、試教驗證與企業銷售包','定義核心定位、六模組架構、教材與驗收方式','完成模組數、工具數、試教回饋、企業提案數','P0','Alex / Sophie / Daniel','進行中','AMO案例對外匿名與授權方式']
   ],
   funnels: [
     ['漏斗ID','服務ID','類別','服務名稱','主要客群','觸及渠道','名單誘因','有效名單條件','洽談／體驗','成交CTA','後端承接','30天觸及目標','30天有效名單','30天洽談／體驗','30天成交','主責','狀態','備註'],
@@ -67,12 +69,12 @@ const seed = {
 const operatingMapSeed = [
   ['目標ID','母目標ID','層級','策略主軸','目標／方向','完成定義','核心指標','基準值','目標值','檢視日','主責','進度%','狀態','優先級','待CEO確認','三位主管共識'],
   ['V-001','','願景','公司方向','讓每個人都能被看懂、被理解，從內在建立自信，擁有更好的關係與生活。','品牌核心、使命與主張已確認並一致使用','客戶的理解、自信、溝通與關係改善','已完成第一版','內容、服務與溝通一致','2027-12-31','CEO / Alex / Sophie',100,'已完成','P0','已於2026-11-17確認','作為所有服務、內容與產品判斷基準'],
-  ['NS-001','V-001','北極星','公司方向','每月穩定增加付費客戶與企業合作案','每月都能看見新增個人客戶、續購、轉介紹與企業合作成果','每月新增付費客戶數＋新增企業合作案數','未統一','每月穩定成長','每月最後一日','CEO / Alex',5,'待CEO確認','P0','北極星採客戶數、營收或混合指標','建議以付費成果為主，營收與轉介紹為輔'],
-  ['Y-001','NS-001','年度目標','營收與商務','建立可持續的B2B與B2C營收組合','12家付費B2B合作、60位付費個人客戶','B2B合作數、B2C客戶數、營收、毛利','B2B 0家','B2B 12家；B2C 60位','2027-12-31','Alex / Sophie',5,'待CEO確認','P0','年度數字與可投入服務量','講座打開B2B，個人服務與顧問提高價值'],
-  ['Y-002','NS-001','年度目標','品牌與自媒體','建立穩定被看見、被理解、可轉換的內容系統','每週固定輸出並導向LINE、諮詢或活動','內容數、LINE新增、諮詢數','尚未固定','每週3則；LINE有效好友1,000','2027-12-31','Sophie',5,'待CEO確認','P0','內容產量與LINE目標','自媒體是所有服務漏斗前端'],
-  ['Y-003','NS-001','年度目標','客戶與系統','Idealflow是客戶機會主檔，LINE是關係經營入口','新名單、跟進、成交與承接皆可追蹤','建檔率、更新率','Idealflow未連線','正式名單100%建檔','2027-12-31','Sophie / Daniel',10,'進行中','P0','Idealflow與LINE權限','HQ管目標任務；Idealflow管客戶；LINE管互動'],
-  ['Y-004','NS-001','年度目標','產品與服務','每條主力服務都有前端、成交與後端承接','4條產品線完成驗證','有效漏斗、成交率、承接率','9項漏斗草案','4條驗證','2027-12-31','Alex / Sophie',15,'進行中','P1','主力產品最多保留幾條','不能九項同時平均用力'],
-  ['Y-005','NS-001','年度目標','營運與財務','所有工作、決策、客戶與收支有單一正式資料源','每項工作可追溯目標，每月完成損益','歸屬率、逾期率、完整率','HQ已建立','100%歸屬；每月5日前結帳','2027-12-31','Daniel',25,'進行中','P0','每週固定檢視時段','先可用可理解，再自動化'],
+  ['NS-001','V-001','北極星','公司方向','讓更多完成好圈圈服務的人，真正感受到溝通、關係或生活的正向改變','先定義什麼算是完成服務後的實際改變，再建立可持續追蹤方式','每月完成服務且回饋有實際改變的人數（定義中）','尚未建立','待討論','2026-12-31','CEO / Alex / Sophie',5,'待CEO確認','P0','北極星定義與可追蹤方式','營收、客戶與粉絲是重要經營指標，但不直接等於長期價值'],
+  ['Y-001','NS-001','年度目標','營收與商務','2027年建立每月20萬元的穩定服務營收','每月至少4位形象顧問付費客戶；每月維持1家大型企業合作；每季新增1至2件輕量企業案；全年營收至少240萬元','月營收、形象顧問付費客戶、大型企業合作、輕量企業案','AMO每月約12萬元；其他服務待盤點','每月營收20萬元；個人客戶4位／月；大型企業1家／月；輕量企業1至2件／季；全年240萬元','2027-12-31','CEO / Alex / Sophie',5,'進行中','P0','2026-11-17已確認年度方向','AMO於2027年3月到期，第一季需完成續約或找到接替的大型企業客戶'],
+  ['Y-002','NS-001','年度目標','品牌與自媒體','2027年底讓IG與Facebook各達2,000位粉絲','持續發布能讓受眾理解好圈圈的方法與案例，並逐步帶來互動、詢問與服務機會','IG粉絲、Facebook粉絲、內容發布、有效互動與詢問','目前粉絲與內容基準待盤點','IG 2,000以上；Facebook 2,000以上','2027-12-31','CEO / Sophie',5,'進行中','P0','2026-11-17已確認粉絲目標；內容節奏仍需拆解','粉絲不是終點，後續要追蹤內容帶來的詢問與付費轉換'],
+  ['Y-003','V-001','2026建置目標','品牌與成長','完成自媒體、LINE與Idealflow第一版獲客與追蹤系統','可以持續發文、承接名單、分眾跟進，並看見每個機會的下一步','內容日曆、LINE流程、Idealflow漏斗、名單建檔率','三者尚未完整串接','內容日曆1份；LINE流程1套；Idealflow漏斗1條','2026-12-31','Sophie / Daniel',10,'進行中','P0','需取得LINE與Idealflow權限','2026先建好可用版本，2027再依實際轉換優化'],
+  ['Y-004','V-001','2026建置目標','產品與服務','完成可銷售、可交付的服務與課程第一版','主力服務都有對象、價值、內容、交付物與購買方式；AMO陪跑內容完成跨門市可複製模組','服務銷售包、課程模組、講師教材、交付工具','已有AMO案例與六模組雛形','AMO款待6模組＋2小時體驗版＋90天陪跑版＋企業銷售包','2026-12-31','Alex / Sophie / Daniel',15,'進行中','P0','第一版先鎖定有實體門市的連鎖服務企業','核心是把依賴個人熱忱的好服務，變成全門市可學、可做、可帶、可追蹤的款待系統'],
+  ['Y-005','V-001','2026建置目標','營運與財務','完成可追蹤的公司營運與財務系統','目標、任務、討論、客戶、專案、收入與支出都能在單一正式資料源找到','任務歸屬率、每週更新率、收支完整率','HQ已建立，仍持續調整使用方式','正式工作100%歸屬；每週更新；月度損益可查看','2026-12-31','Daniel / CEO',40,'進行中','P0','Dashboard依CEO實際使用逐步優化','先讓系統每天可用，再逐步自動化'],
   ['M-001','Y-001','90天目標','營收與商務','完成公勝免費示範並成交首家付費講座','免費場、案例、付費場完成','免費場、付費場、主辦人','商業模式已確認','免費場1；付費場1；主辦人30','2027-02-15','Alex / Sophie',25,'進行中','P0','公勝日期與課程細節','第一主戰場'],
   ['M-002','Y-002','90天目標','品牌與成長','完成自媒體、LINE與Idealflow第一版基礎','內容日曆、LINE標籤與CRM漏斗可用','內容、LINE、CRM建檔','未完整串接','12週內容；LINE分眾；CRM漏斗1條','2027-02-15','Sophie / Daniel',5,'進行中','P0','帳號與權限','三個渠道共用服務、客群與階段定義'],
   ['M-003','Y-005','90天目標','營運與管理','建立CEO一眼看懂且能每天新增事項的作戰系統','目標、任務、討論與收件匣互相連結','歸屬率、更新率、未分類數','舊版難理解','100%有目標、類別、主責、狀態','2027-02-15','Daniel',35,'進行中','P0','CEO最常用3個入口','總覽只回答往哪裡、現在如何、下一步、卡點'],
@@ -101,7 +103,8 @@ const inboxSeed = [
   ['IN-002','2026-11-17','建立自媒體完整規劃與進度管理','待辦','品牌自媒體','CEO對話','S-004','自媒體','Sophie','P0','已轉任務','2026-11-24','確認內容支柱、語氣與日曆','CEO可拍攝時間','T-021','納入30天目標'],
   ['IN-003','2026-11-17','把Idealflow、LINE與HQ的角色分清並串成一條漏斗','待討論','Idealflow / CRM','CEO對話','M-002','成長系統','Sophie / Daniel','P0','待討論','2026-11-20','盤點帳號、權限、欄位與資料責任','Idealflow與LINE現況','','避免重複維護'],
   ['IN-004','2026-11-17','建立LINE歡迎、標籤與分眾跟進流程','待辦','LINE經營','CEO對話','S-008','LINE經營','Sophie','P0','已轉任務','2026-11-25','盤點現有帳號與好友狀態','LINE管理權限','T-022','與自媒體導流連動'],
-  ['IN-005','2026-11-17','Dashboard總覽要看見公司所有待辦、待討論、進行中與目標計畫','待辦','營運管理','CEO對話','S-006','HQ Dashboard','Daniel','P0','進行中','2026-11-18','重做總覽與目標樹','新版是否直覺','T-017','本次對話新增']
+  ['IN-005','2026-11-17','Dashboard總覽要看見公司所有待辦、待討論、進行中與目標計畫','待辦','營運管理','CEO對話','S-006','HQ Dashboard','Daniel','P0','進行中','2026-11-18','重做總覽與目標樹','新版是否直覺','T-017','本次對話新增'],
+  ['IN-006','2026-11-17','年底前把AMO陪跑內容變成可套用不同門市與企業的模組課程','待辦','服務產品','CEO對話','Y-004','AMO款待模組化','Alex / Sophie / Daniel','P0','已轉任務','2026-12-31','依六模組完成教材、工具、試教與企業銷售包','AMO案例對外匿名與授權方式','T-023','已拆成T-024至T-029']
 ];
 
 const taskMetaSeed = {
@@ -112,7 +115,10 @@ const taskMetaSeed = {
   'T-013':['S-003','網站與內容','任務',20],'T-014':['S-001','服務產品','專案',40],'T-015':['M-001','Idealflow / CRM','流程',20],
   'T-016':['M-001','合作夥伴','待討論',50],'T-017':['S-006','營運管理','專案',40],'T-018':['M-004','服務產品','實驗',20],
   'T-019':['M-004','服務產品','實驗',20],'T-020':['M-004','服務產品','實驗',20],'T-021':['S-004','品牌自媒體','專案',5],
-  'T-022':['S-008','LINE經營','專案',5]
+  'T-022':['S-008','LINE經營','專案',5],
+  'T-023':['Y-004','服務產品','專案',15],'T-024':['Y-004','服務產品','任務',10],'T-025':['Y-004','服務產品','任務',10],
+  'T-026':['Y-004','服務產品','任務',5],'T-027':['Y-004','服務產品','任務',5],'T-028':['Y-004','服務產品','里程碑',0],
+  'T-029':['Y-004','策略與商務','任務',0]
 };
 
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -157,9 +163,12 @@ function renderGoals() {
   const order=['核心觀點','願景','使命','品牌主張'];
   const foundation=[...state.brandFoundation].sort((a,b)=>order.indexOf(a['類型'])-order.indexOf(b['類型']));
   document.querySelector('#brand-foundation-grid').innerHTML=foundation.map(g=>`<article class="foundation-card foundation-row"><span>${esc(g['類型'])}</span><h3>${esc(g['正式文字'])}</h3><small>${esc(g['使用方式'])}</small></article>`).join('');
-  document.querySelector('#north-star-banner').innerHTML=north?`<div><span>北極星</span><small>全公司共同追的商業結果</small></div><h3>${esc(north['目標／方向'])}</h3><p>${esc(north['核心指標'])}</p>`:'';
+  const northPending=north&&north['狀態']==='待CEO確認';
+  document.querySelector('#north-star-banner').innerHTML=north?`<div><span>北極星${northPending?' · 討論中':''}</span><small>${northPending?'尚未定案，先以客戶改變為討論方向':'全公司共同追的長期結果'}</small></div><h3>${esc(north['目標／方向'])}</h3><p>${esc(north['核心指標'])}</p>`:'';
   const annual=state.operatingMap.filter(g=>g['層級']==='年度目標');
   document.querySelector('#annual-goal-grid').innerHTML=annual.map((g,i)=>`<article class="annual-goal-card"><header><span>0${i+1}</span><div><small>${esc(g['策略主軸'])}</small><h4>${esc(g['目標／方向'])}</h4></div><b>${numeric(g['進度%'])}%</b></header><p>${esc(g['完成定義'])}</p><div class="goal-progress"><span style="width:${Math.min(100,numeric(g['進度%']))}%"></span></div><footer><span>${esc(g['目標值'])}</span><small>${esc(g['主責'])}</small></footer></article>`).join('');
+  const build=state.operatingMap.filter(g=>g['層級']==='2026建置目標');
+  document.querySelector('#build-goal-grid').innerHTML=build.map((g,i)=>`<article class="build-goal-card"><header><span>${String(i+1).padStart(2,'0')}</span><div><small>${esc(g['策略主軸'])}</small><h4>${esc(g['目標／方向'])}</h4></div><b>${numeric(g['進度%'])}%</b></header><p>${esc(g['完成定義'])}</p><div class="goal-progress"><span style="width:${Math.min(100,numeric(g['進度%']))}%"></span></div><footer><strong>${esc(g['目標值'])}</strong><small>${esc(g['主責'])}</small></footer></article>`).join('');
   const medium=state.operatingMap.filter(g=>g['層級']==='90天目標');
   document.querySelector('#focus-roadmap').innerHTML=medium.map(g=>{const children=state.operatingMap.filter(c=>c['母目標ID']===g['目標ID']);return `<article class="focus-item"><header><span>${esc(g['目標ID'])}</span><b>${numeric(g['進度%'])}%</b></header><h4>${esc(g['目標／方向'])}</h4><p>${esc(g['目標值'])}</p><div class="mini-goals">${children.map(c=>`<span><i class="${statusClass(c['狀態'])}"></i>${esc(c['目標ID'])} ${esc(c['目標／方向'])}</span>`).join('')}</div></article>`;}).join('');
 }
@@ -186,12 +195,12 @@ function renderWorkOverview() {
 
 function populateGoalWorkFilters() {
   const goal=document.querySelector('#goal-filter'),cat=document.querySelector('#category-filter');
-  goal.innerHTML='<option value="">所有目標</option>'+state.operatingMap.filter(g=>['90天目標','30天目標'].includes(g['層級'])).map(g=>`<option value="${esc(g['目標ID'])}">${esc(g['目標ID'])} · ${esc(g['目標／方向'])}</option>`).join('');
+  goal.innerHTML='<option value="">所有目標</option>'+state.operatingMap.filter(g=>['2026建置目標','90天目標','30天目標'].includes(g['層級'])).map(g=>`<option value="${esc(g['目標ID'])}">${esc(g['目標ID'])} · ${esc(g['目標／方向'])}</option>`).join('');
   const cats=[...new Set(state.tasks.map(t=>t['工作類別']).filter(Boolean))];cat.innerHTML='<option value="">所有類別</option>'+cats.map(x=>`<option>${esc(x)}</option>`).join('');
 }
 
 function renderGoalTree() {
-  const levels=['年度目標','90天目標','30天目標'];
+  const levels=['2026建置目標','年度目標','90天目標','30天目標'];
   document.querySelector('#goal-level-tabs').innerHTML=levels.map(x=>`<button class="chip ${state.goalLevel===x?'active':''}" data-goal-level="${x}">${x}</button>`).join('');
   const rows=state.operatingMap.filter(g=>g['層級']===state.goalLevel);
   document.querySelector('#goal-tree').innerHTML=rows.map(g=>{const tasks=state.tasks.filter(t=>t['目標ID']===g['目標ID']);return `<article class="goal-tree-card"><header><div><span>${esc(g['目標ID'])} · ${esc(g['策略主軸'])}</span><h4>${esc(g['目標／方向'])}</h4></div><b>${numeric(g['進度%'])}%</b></header><p>${esc(g['完成定義'])}</p><div class="goal-progress"><span style="width:${Math.min(100,numeric(g['進度%']))}%"></span></div><footer><span>${tasks.length} 個直接任務</span><small>${esc(g['主責'])} · ${esc(g['檢視日'])}</small></footer></article>`;}).join('');
@@ -424,7 +433,7 @@ function openInbox() {
   const form=document.querySelector('#inbox-form');form.reset();
   const categories=['策略與商務','業務開發','品牌自媒體','LINE經營','Idealflow / CRM','網站與內容','服務產品','財務','營運管理','合作夥伴'];
   document.querySelector('#inbox-category').innerHTML=categories.map(x=>`<option>${x}</option>`).join('');
-  document.querySelector('#inbox-goal').innerHTML='<option value="">先收件，尚未歸屬</option>'+state.operatingMap.filter(g=>['90天目標','30天目標'].includes(g['層級'])).map(g=>`<option value="${esc(g['目標ID'])}">${esc(g['目標ID'])} · ${esc(g['目標／方向'])}</option>`).join('');
+  document.querySelector('#inbox-goal').innerHTML='<option value="">先收件，尚未歸屬</option>'+state.operatingMap.filter(g=>['2026建置目標','90天目標','30天目標'].includes(g['層級'])).map(g=>`<option value="${esc(g['目標ID'])}">${esc(g['目標ID'])} · ${esc(g['目標／方向'])}</option>`).join('');
   document.querySelector('#inbox-dialog').showModal();
 }
 
