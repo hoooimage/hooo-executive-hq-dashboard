@@ -1,4 +1,5 @@
-const state = { data: null, tasks: [], decisions: [], meetings: [], progress: [] };
+const state = { data: null, tasks: [], decisions: [], meetings: [], progress: [], syncing: false };
+const LIVE_ENDPOINT = String(window.HOOO_DATA_ENDPOINT || '').trim();
 
 const columnObjects = (values) => {
   if (!values?.length) return [];
@@ -60,8 +61,14 @@ function renderProgress() {
 function populateFilters() {
   const statuses = [...new Set(state.tasks.map(t => t['狀態']).filter(Boolean))];
   const owners = [...new Set(state.tasks.map(t => t['部門']).filter(Boolean))];
-  document.querySelector('#status-filter').insertAdjacentHTML('beforeend', statuses.map(s => `<option>${esc(s)}</option>`).join(''));
-  document.querySelector('#owner-filter').insertAdjacentHTML('beforeend', owners.map(s => `<option>${esc(s)}</option>`).join(''));
+  const statusFilter = document.querySelector('#status-filter');
+  const ownerFilter = document.querySelector('#owner-filter');
+  const selectedStatus = statusFilter.value;
+  const selectedOwner = ownerFilter.value;
+  statusFilter.innerHTML = '<option value="">所有狀態</option>' + statuses.map(s => `<option>${esc(s)}</option>`).join('');
+  ownerFilter.innerHTML = '<option value="">所有部門</option>' + owners.map(s => `<option>${esc(s)}</option>`).join('');
+  statusFilter.value = statuses.includes(selectedStatus) ? selectedStatus : '';
+  ownerFilter.value = owners.includes(selectedOwner) ? selectedOwner : '';
 }
 
 function renderTasks() {
@@ -135,26 +142,87 @@ function renderExecutives() {
   }).join('');
 }
 
-async function init() {
+function setSyncStatus(mode, message) {
+  const badge = document.querySelector('#sync-badge');
+  badge.className = `snapshot-badge ${mode}`;
+  badge.querySelector('span').textContent = message;
+}
+
+function loadJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `__hoooSync_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    const timeout = window.setTimeout(() => cleanup(new Error('即時同步逾時')), 15000);
+
+    function cleanup(error, data) {
+      window.clearTimeout(timeout);
+      script.remove();
+      delete window[callbackName];
+      error ? reject(error) : resolve(data);
+    }
+
+    window[callbackName] = data => cleanup(null, data);
+    script.onerror = () => cleanup(new Error('無法連線即時資料'));
+    const separator = url.includes('?') ? '&' : '?';
+    script.src = `${url}${separator}callback=${encodeURIComponent(callbackName)}&t=${Date.now()}`;
+    document.head.appendChild(script);
+  });
+}
+
+async function loadSnapshot() {
+  const response = await fetch(`./data.json?t=${Date.now()}`, { cache: 'no-store' });
+  if (!response.ok) throw new Error('備援資料讀取失敗');
+  return response.json();
+}
+
+function applyData(data, source) {
+  if (!data?.sheets?.tasks?.values) throw new Error('資料格式不完整');
+  state.data = data;
+  const sheets = data.sheets;
+  state.tasks = columnObjects(sheets.tasks.values);
+  state.progress = columnObjects(sheets.progress.values);
+  state.decisions = columnObjects(sheets.decisions.values);
+  state.meetings = columnObjects(sheets.meetings.values);
+  document.querySelectorAll('[data-sheet-link]').forEach(link => link.href = data.sourceUrl);
+  const synced = new Date(data.generatedAt);
+  const stamp = synced.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false });
+  document.querySelector('#sync-time').textContent = source === 'live' ? `即時同步：${stamp}` : `備援快照：${stamp}`;
+  setSyncStatus(source === 'live' ? 'live' : 'fallback', source === 'live' ? '已連線試算表' : '使用備援快照');
+  renderKpis(); renderQueue(); renderProgress(); populateFilters(); renderTasks(); renderRevenue(); renderGovernance(); renderExecutives();
+}
+
+async function syncData() {
+  if (state.syncing) return;
+  state.syncing = true;
+  const button = document.querySelector('#sync-now');
+  button.disabled = true;
+  button.textContent = '同步中…';
+  setSyncStatus('syncing', '正在同步');
+
   try {
-    const response = await fetch('./data.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error('資料讀取失敗');
-    state.data = await response.json();
-    const sheets = state.data.sheets;
-    state.tasks = columnObjects(sheets.tasks.values);
-    state.progress = columnObjects(sheets.progress.values);
-    state.decisions = columnObjects(sheets.decisions.values);
-    state.meetings = columnObjects(sheets.meetings.values);
-    document.querySelectorAll('[data-sheet-link]').forEach(link => link.href = state.data.sourceUrl);
-    const synced = new Date(state.data.generatedAt);
-    document.querySelector('#sync-time').textContent = `資料快照：${synced.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false })}`;
-    renderKpis(); renderQueue(); renderProgress(); populateFilters(); renderTasks(); renderRevenue(); renderGovernance(); renderExecutives();
-  } catch (error) {
-    document.querySelector('#main').insertAdjacentHTML('afterbegin', `<div class="panel" role="alert">無法載入資料：${esc(error.message)}</div>`);
+    if (!LIVE_ENDPOINT) throw new Error('尚未設定即時同步端點');
+    applyData(await loadJsonp(LIVE_ENDPOINT), 'live');
+  } catch (liveError) {
+    try {
+      applyData(await loadSnapshot(), 'snapshot');
+      console.warn(liveError.message);
+    } catch (snapshotError) {
+      setSyncStatus('error', '資料同步失敗');
+      if (!document.querySelector('#sync-error')) {
+        document.querySelector('#main').insertAdjacentHTML('afterbegin', `<div id="sync-error" class="sync-alert" role="alert">無法載入資料：${esc(snapshotError.message)}</div>`);
+      }
+    }
+  } finally {
+    state.syncing = false;
+    button.disabled = false;
+    button.textContent = '同步最新資料';
   }
 }
 
 document.querySelectorAll('.nav-item').forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
 document.querySelectorAll('[data-jump]').forEach(button => button.addEventListener('click', () => showView(button.dataset.jump)));
 ['task-search','status-filter','owner-filter'].forEach(id => document.querySelector(`#${id}`).addEventListener('input', renderTasks));
-init();
+document.querySelector('#sync-now').addEventListener('click', syncData);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncData(); });
+window.setInterval(syncData, 5 * 60 * 1000);
+syncData();
