@@ -156,7 +156,7 @@ function renderGoals() {
   const north=state.operatingMap.find(g=>g['層級']==='北極星');
   const order=['核心觀點','願景','使命','品牌主張'];
   const foundation=[...state.brandFoundation].sort((a,b)=>order.indexOf(a['類型'])-order.indexOf(b['類型']));
-  document.querySelector('#brand-foundation-grid').innerHTML=foundation.map((g,i)=>`<article class="foundation-card foundation-${i+1}"><header><span>0${i+1}</span><div><small>${esc(g['編號'])}</small><b>${esc(g['類型'])}</b></div></header><h3>${esc(g['正式文字'])}</h3><footer><span>${esc(g['使用方式'])}</span><em>${esc(g['狀態'])}</em></footer></article>`).join('');
+  document.querySelector('#brand-foundation-grid').innerHTML=foundation.map(g=>`<article class="foundation-card foundation-row"><span>${esc(g['類型'])}</span><h3>${esc(g['正式文字'])}</h3><small>${esc(g['使用方式'])}</small></article>`).join('');
   document.querySelector('#north-star-banner').innerHTML=north?`<div><span>北極星</span><small>全公司共同追的商業結果</small></div><h3>${esc(north['目標／方向'])}</h3><p>${esc(north['核心指標'])}</p>`:'';
   const annual=state.operatingMap.filter(g=>g['層級']==='年度目標');
   document.querySelector('#annual-goal-grid').innerHTML=annual.map((g,i)=>`<article class="annual-goal-card"><header><span>0${i+1}</span><div><small>${esc(g['策略主軸'])}</small><h4>${esc(g['目標／方向'])}</h4></div><b>${numeric(g['進度%'])}%</b></header><p>${esc(g['完成定義'])}</p><div class="goal-progress"><span style="width:${Math.min(100,numeric(g['進度%']))}%"></span></div><footer><span>${esc(g['目標值'])}</span><small>${esc(g['主責'])}</small></footer></article>`).join('');
