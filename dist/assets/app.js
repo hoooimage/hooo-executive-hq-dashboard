@@ -1,7 +1,7 @@
 const now = new Date();
 const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
 const LIVE_ENDPOINT = String(window.HOOO_DATA_ENDPOINT || '').trim();
-const WRITE_ENDPOINT = String(window.HOOO_WRITE_ENDPOINT || LIVE_ENDPOINT).trim();
+const WRITE_ENDPOINT = String(window.HOOO_WRITE_ENDPOINT || '').trim();
 
 const seed = {
   goals: [
