@@ -4,170 +4,332 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#bf2f70">
-  <meta name="description" content="HOOO AI Executive HQ｜CEO 戰情室、任務、決策、會議與三位 AI 主管進度。">
+  <meta name="description" content="HOOO AI Executive HQ｜公司目標、主管日報、專案、損益、決策與會議。">
   <title>HOOO AI Executive HQ</title>
   <link rel="stylesheet" href="./assets/styles.css">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要內容</a>
   <div class="app-shell">
-    <aside class="sidebar" aria-label="主要導覽">
-      <div class="brand-lockup">
-        <img class="brand-logo" src="./assets/hooo-logo.png" alt="好圈圈 Hooo Image">
-        <div>
-          <p class="eyebrow">好感 · 形象 · 連結</p>
-          <h1>AI Executive HQ</h1>
-        </div>
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="./assets/hooo-logo.png" alt="好圈圈 HOOO Image">
+        <div><small>好感・信任・連結</small><strong>Executive HQ</strong></div>
       </div>
-      <nav class="nav-list">
+      <nav class="nav-list" aria-label="主要導覽">
         <button class="nav-item is-active" data-view="overview"><span>01</span>CEO 總覽</button>
-        <button class="nav-item" data-view="tasks"><span>02</span>共同任務</button>
-        <button class="nav-item" data-view="revenue"><span>03</span>營收衝刺</button>
+        <button class="nav-item" data-view="tasks"><span>02</span>目標與工作</button>
+        <button class="nav-item" data-view="revenue"><span>03</span>服務與營收</button>
         <button class="nav-item" data-view="governance"><span>04</span>決策與會議</button>
         <button class="nav-item" data-view="executives"><span>05</span>三位主管</button>
       </nav>
       <div class="sidebar-foot">
-        <p>資料主檔</p>
+        <p>資料只維護一份</p>
         <a data-sheet-link target="_blank" rel="noopener">開啟 Google Sheet ↗</a>
-        <small id="sync-time">正在連線試算表…</small>
+        <small id="sync-time">正在連線…</small>
       </div>
     </aside>
 
     <main id="main" class="main-panel">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">HOOO CEO COMMAND CENTER</p>
-          <h2 id="page-title">今天最重要的事</h2>
-        </div>
-        <div class="topbar-actions">
-          <span class="snapshot-badge" id="sync-badge"><i></i><span>正在同步</span></span>
-          <button class="button sync-button" id="sync-now" type="button">同步最新資料</button>
-          <a class="button secondary" data-sheet-link target="_blank" rel="noopener">原始資料 ↗</a>
+        <div><p class="eyebrow">HOOO CEO COMMAND CENTER</p><h1 id="page-title">公司作戰總覽</h1></div>
+        <div class="top-actions">
+          <span class="sync-state" id="sync-badge"><i></i><span>同步中</span></span>
+          <button class="button primary" id="sync-now">同步最新資料</button>
+          <a class="button secondary desktop-only" data-sheet-link target="_blank" rel="noopener">原始資料 ↗</a>
         </div>
       </header>
 
       <section class="view is-visible" data-view-panel="overview">
-        <div class="hero-grid">
-          <article class="hero-card">
-            <div class="hero-copy">
-              <p class="eyebrow light">30 DAY REVENUE SPRINT · 好感成交</p>
-              <h3>把網站的信任，轉成第一批團隊講座。</h3>
-              <p>第一波主力：業務團隊 2 小時「客戶信任競爭力實戰課」。先取得主辦方洽談，再用一對多講座承接個人服務與西服需求。</p>
-              <div class="hero-actions">
-                <a class="button light" href="https://hoooimage.com/business-elite-trust" target="_blank" rel="noopener">查看主力課程 ↗</a>
-                <button class="button ghost" data-jump="revenue">查看衝刺任務</button>
-              </div>
-            </div>
-            <div class="hero-signal" aria-label="營收路徑">
-              <div><strong>01</strong><span>主辦方名單</span></div>
-              <div><strong>02</strong><span>洽談與提案</span></div>
-              <div><strong>03</strong><span>團隊講座</span></div>
-              <div><strong>04</strong><span>課後分流</span></div>
-            </div>
-          </article>
+        <section class="command-hero">
+          <div><p class="eyebrow">2027 COMPANY MAP</p><h2>公司現在要往哪裡？</h2><p>從願景、北極星到今天的下一步，所有工作都可以往上找到理由。</p></div>
+          <div class="hero-actions"><button class="button light" id="add-inbox-item">＋ 新增今日事項</button><button class="button ghost" data-jump="tasks">查看完整作戰地圖</button></div>
+        </section>
 
-          <article class="meeting-card">
-            <p class="eyebrow">NEXT DECISION</p>
-            <div class="date-lockup"><span>18</span><small>NOV<br>WED</small></div>
-            <h3>IMAGESUIT 合作條件討論</h3>
-            <p>價格、人數、場地交通、開票、名單同意與課後承接。</p>
-            <span class="tag amber">M-004 · 待舉行</span>
-          </article>
+        <section class="section-block brand-foundation-section">
+          <div class="section-head"><div><p class="eyebrow">BRAND FOUNDATION</p><h3>好圈圈為什麼存在</h3></div><span class="section-note">已由 CEO 確認</span></div>
+          <div id="brand-foundation-grid" class="brand-foundation-grid"></div>
+        </section>
+
+        <div id="north-star-banner" class="north-star-banner"></div>
+
+        <section class="section-block annual-section">
+          <div class="section-head"><div><p class="eyebrow">ANNUAL OUTCOMES</p><h3>2027 一年要做到什麼</h3></div><span class="section-note">數字為三位主管第一版建議</span></div>
+          <div id="annual-goal-grid" class="annual-goal-grid"></div>
+        </section>
+
+        <div id="kpi-grid" class="kpi-grid command-kpis"></div>
+
+        <div class="two-column overview-focus">
+          <section class="panel">
+            <div class="section-head"><div><p class="eyebrow">90 / 30 DAY FOCUS</p><h3>中期與短期焦點</h3></div><button class="text-button" data-jump="tasks">查看全部目標</button></div>
+            <div id="focus-roadmap" class="focus-roadmap"></div>
+          </section>
+          <section class="panel inbox-panel">
+            <div class="section-head"><div><p class="eyebrow">DAILY INBOX</p><h3>今日新增與待討論</h3></div><button class="small-button approve" id="add-inbox-item-small">＋ 新增</button></div>
+            <div id="inbox-list" class="inbox-list"></div>
+          </section>
         </div>
 
-        <div id="kpi-grid" class="kpi-grid" aria-label="關鍵數字"></div>
+        <section class="section-block">
+          <div class="section-head"><div><p class="eyebrow">COMPANY WORKLOAD</p><h3>全公司工作總覽</h3></div><button class="text-button" data-jump="tasks">打開工作板</button></div>
+          <div id="work-overview" class="work-overview"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head"><div><p class="eyebrow">08:00 EXECUTIVE BRIEF</p><h3>三位主管今天要你看的重點</h3></div><button class="text-button" data-jump="executives">查看日報</button></div>
+          <div id="daily-grid" class="daily-grid"></div>
+        </section>
 
         <div class="two-column">
           <section class="panel">
-            <div class="panel-head">
-              <div><p class="eyebrow">CEO QUEUE</p><h3>等待你確認</h3></div>
-              <button class="text-button" data-jump="governance">查看全部</button>
-            </div>
-            <div id="decision-queue" class="stack-list"></div>
+            <div class="section-head"><div><p class="eyebrow">CEO ACTIONS</p><h3>等待你確認</h3></div><span class="section-note">可確認、退回與補充說明</span></div>
+            <div id="decision-queue" class="action-list"></div>
           </section>
-
           <section class="panel">
-            <div class="panel-head">
-              <div><p class="eyebrow">LATEST MOVEMENT</p><h3>最新進度</h3></div>
-              <span class="muted">只顯示最近更新</span>
-            </div>
+            <div class="section-head"><div><p class="eyebrow">LATEST MOVEMENT</p><h3>最新進度</h3></div><button class="text-button" data-jump="governance">查看歷程</button></div>
             <div id="progress-feed" class="timeline"></div>
           </section>
         </div>
       </section>
 
       <section class="view" data-view-panel="tasks">
-        <section class="panel full-height">
-          <div class="panel-head task-head">
-            <div><p class="eyebrow">SINGLE SOURCE OF TRUTH</p><h3>共同任務</h3></div>
-            <div class="filters" aria-label="任務篩選">
-              <label><span class="sr-only">搜尋任務</span><input id="task-search" type="search" placeholder="搜尋任務、負責人或專案"></label>
-              <label><span class="sr-only">狀態</span><select id="status-filter"><option value="">所有狀態</option></select></label>
-              <label><span class="sr-only">主管</span><select id="owner-filter"><option value="">所有部門</option></select></label>
+        <div class="intro-row">
+          <div><p class="eyebrow">GOAL TO ACTION</p><h2>每一件事，都要知道為什麼做。</h2></div>
+          <div class="ledger-actions"><button class="button primary" id="add-inbox-item-tasks">＋ 新增事項</button></div>
+        </div>
+        <section class="panel goal-map-panel">
+          <div class="section-head"><div><p class="eyebrow">GOAL TREE</p><h3>北極星 → 年度 → 90天 → 30天</h3></div><div id="goal-level-tabs" class="project-tabs goal-level-tabs"></div></div>
+          <div id="goal-tree" class="goal-tree"></div>
+        </section>
+        <section class="panel work-board-panel">
+          <div class="section-head task-head">
+            <div><p class="eyebrow">ALL COMPANY WORK</p><h3>全公司工作板</h3></div>
+            <div class="filters"><select id="goal-filter"><option value="">所有目標</option></select><select id="category-filter"><option value="">所有類別</option></select></div>
+          </div>
+          <div id="work-board" class="work-board"></div>
+        </section>
+        <section class="panel">
+          <div class="section-head task-head">
+            <div><p class="eyebrow">TIMELINE</p><h3>專案與任務時程</h3></div>
+            <div class="filters">
+              <input id="task-search" type="search" placeholder="搜尋專案、任務或負責人">
+              <select id="status-filter"><option value="">所有狀態</option></select>
+              <select id="owner-filter"><option value="">所有部門</option></select>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>任務</th><th>負責</th><th>優先</th><th>狀態</th><th>期限</th><th>下一步</th></tr></thead>
-              <tbody id="task-table"></tbody>
-            </table>
-          </div>
+          <div id="project-tabs" class="project-tabs"></div>
+          <div id="gantt-board" class="gantt-board"></div>
+        </section>
+        <section class="panel list-panel">
+          <div class="section-head"><div><p class="eyebrow">TASK DETAILS</p><h3>任務明細</h3></div><span id="task-count" class="section-note"></span></div>
+          <div class="table-wrap"><table><thead><tr><th>專案／任務</th><th>負責</th><th>狀態</th><th>期間</th><th>下一步</th></tr></thead><tbody id="task-table"></tbody></table></div>
           <p id="task-empty" class="empty-state" hidden>沒有符合條件的任務。</p>
         </section>
       </section>
 
       <section class="view" data-view-panel="revenue">
-        <div class="section-intro">
-          <div><p class="eyebrow">BUSINESS ELITE TRUST</p><h3>第一波營收作戰圖</h3></div>
-          <p>不是等待網站自然流量，而是主動找到能安排一對多講座的業務團隊主辦人。</p>
+        <div class="intro-row">
+          <div><p class="eyebrow">SERVICE & PROFIT</p><h2>收入、支出分開記，專案損益自動彙總。</h2></div>
+          <div class="ledger-actions"><button class="button primary" id="add-income">＋ 新增收入</button><button class="button expense-button" id="add-expense">－ 新增支出</button></div>
         </div>
-        <div class="funnel" aria-label="營收漏斗">
-          <div><span>30</span><small>主辦方名單</small></div><i>→</i>
-          <div><span>8</span><small>有效洽談</small></div><i>→</i>
-          <div><span>3</span><small>正式提案</small></div><i>→</i>
-          <div><span>1–2</span><small>試辦場次</small></div>
-        </div>
-        <div id="revenue-tasks" class="card-grid"></div>
-        <section class="panel split-panel">
+        <section class="panel finance-toolbar">
           <div>
-            <p class="eyebrow">AFTER THE WORKSHOP</p>
-            <h3>課後雙軌承接</h3>
-            <p>名單必須經過明確同意，完整名單不直接共享；學員主動勾選需求後才進入後續服務。</p>
+            <p class="eyebrow">FINANCE PERIOD</p>
+            <h3 id="finance-period-label">本月收支</h3>
           </div>
-          <div class="branch-grid">
-            <div><span>HOOO</span><strong>個人形象服務</strong><p>色彩、形象策略、重要場合與長期陪跑。</p></div>
-            <div><span>IMAGESUIT</span><strong>西服方案</strong><p>明確勾選西服需求後，交由合作夥伴承接。</p></div>
+          <div class="period-controls" aria-label="財務期間篩選">
+            <div class="period-switch">
+              <button class="chip active" type="button" data-finance-mode="month">月</button>
+              <button class="chip" type="button" data-finance-mode="year">年</button>
+              <button class="chip" type="button" data-finance-mode="all">全部</button>
+            </div>
+            <label>年度<select id="finance-year"></select></label>
+            <label id="finance-month-wrap">月份<select id="finance-month"></select></label>
           </div>
+        </section>
+        <div id="revenue-kpis" class="kpi-grid revenue-kpis"></div>
+        <div class="two-column finance-insights">
+          <section class="panel">
+            <div class="section-head"><div><p class="eyebrow">12-MONTH TREND</p><h3>月度營收與成本</h3></div><span class="section-note">應收／應付認列</span></div>
+            <div id="finance-trend" class="finance-chart"></div>
+          </section>
+          <section class="panel">
+            <div class="section-head"><div><p class="eyebrow">PROJECT PROFIT</p><h3>專案損益</h3></div><span class="section-note">依目前期間</span></div>
+            <div id="project-profit" class="project-profit"></div>
+          </section>
+        </div>
+        <section class="section-block">
+          <div class="section-head"><div><p class="eyebrow">SERVICE CATALOG</p><h3>目前服務項目</h3></div><a class="text-button" href="https://hoooimage.com/" target="_blank" rel="noopener">參考官網 ↗</a></div>
+          <div id="service-filters" class="project-tabs"></div>
+          <div id="service-grid" class="service-grid"></div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><div><p class="eyebrow">INCOME LEDGER</p><h3>收入明細</h3></div><span class="section-note">客戶、專案、應收與實收</span></div>
+          <div class="table-wrap"><table><thead><tr><th>日期</th><th>客戶／專案</th><th>服務</th><th>應收</th><th>已收</th><th>未收</th><th>方式／發票</th><th>狀態</th></tr></thead><tbody id="income-table"></tbody></table></div>
+        </section>
+        <section class="panel expense-panel">
+          <div class="section-head"><div><p class="eyebrow">EXPENSE LEDGER</p><h3>支出明細</h3></div><span class="section-note">供應商、類別、應付與實付</span></div>
+          <div class="table-wrap"><table><thead><tr><th>日期</th><th>專案</th><th>固定／變動</th><th>費用類別／項目</th><th>供應商</th><th>應付</th><th>已付</th><th>未付</th><th>方式／憑證</th><th>狀態</th></tr></thead><tbody id="expense-table"></tbody></table></div>
+          <p id="expense-empty" class="empty-state">目前尚未登錄支出。</p>
+        </section>
+        <section class="panel expense-panel">
+          <div class="section-head"><div><p class="eyebrow">COST CATEGORY</p><h3>費用類別管理</h3></div><button class="button secondary" id="add-cost-category">＋ 新增類別</button></div>
+          <p class="section-description">房租、網路費等固定成本，與水電瓦斯、講師費、廣告費等變動成本分開管理；停用後不再出現在新支出的選單。</p>
+          <div id="cost-category-groups" class="cost-category-groups"></div>
         </section>
       </section>
 
       <section class="view" data-view-panel="governance">
+        <div class="intro-row">
+          <div><p class="eyebrow">DECISIONS & HISTORY</p><h2>從討論、決策到任務，都看得到承接。</h2></div>
+          <p>每次對話與會議都保留摘要、決策 ID、任務 ID、目前狀態與下一步。</p>
+        </div>
         <div class="two-column governance-grid">
           <section class="panel">
-            <div class="panel-head"><div><p class="eyebrow">DECISIONS</p><h3>決策紀錄</h3></div></div>
+            <div class="section-head"><div><p class="eyebrow">DECISIONS</p><h3>共同決策</h3></div></div>
             <div id="decision-list" class="decision-list"></div>
           </section>
           <section class="panel">
-            <div class="panel-head"><div><p class="eyebrow">MEETINGS</p><h3>會議節奏</h3></div></div>
+            <div class="section-head"><div><p class="eyebrow">MEETINGS</p><h3>會議與討論</h3></div></div>
             <div id="meeting-list" class="meeting-list"></div>
           </section>
         </div>
+        <section class="panel history-panel">
+          <div class="section-head"><div><p class="eyebrow">DISCUSSION PROGRESS</p><h3>所有討論的最新承接</h3></div><select id="history-project"><option value="">所有專案</option></select></div>
+          <div id="history-list" class="history-list"></div>
+        </section>
       </section>
 
       <section class="view" data-view-panel="executives">
-        <div class="section-intro">
-          <div><p class="eyebrow">EXECUTIVE TEAM</p><h3>三位主管工作入口</h3></div>
-          <p>三個視角、同一份任務主檔。每天早上 08:00 各提出一項最重要議題。</p>
+        <div class="intro-row">
+          <div><p class="eyebrow">EXECUTIVE DAILY</p><h2>先看今日重點，再看策略與漏斗。</h2></div>
+          <p>每天上午 08:00 由三位主管提案；Alex 負責策略與商務排序，Sophie 負責九項服務漏斗，Daniel 負責進度承接。</p>
         </div>
         <div id="executive-grid" class="executive-grid"></div>
+
+        <section class="panel executive-section strategy-section">
+          <div class="section-head">
+            <div><p class="eyebrow">ALEX / CSO</p><h3>90 天策略與商務排序</h3></div>
+            <span class="section-note">P0 先做，草案待 CEO 調整</span>
+          </div>
+          <div id="strategy-grid" class="strategy-grid"></div>
+        </section>
+
+        <section class="panel executive-section funnel-section">
+          <div class="section-head">
+            <div><p class="eyebrow">SOPHIE / CGO</p><h3>九項服務漏斗與 30 天小目標</h3></div>
+            <span class="section-note">目前數字是第一版驗證值</span>
+          </div>
+          <div id="funnel-tabs" class="project-tabs funnel-tabs"></div>
+          <div id="funnel-detail" class="funnel-detail"></div>
+        </section>
       </section>
 
-      <footer>
-        <p>HOOO AI Executive HQ · 好圈圈經營戰情室</p>
-        <p>網站只呈現必要資訊；Google Sheet 是唯一任務、決策與進度主檔。</p>
-      </footer>
+      <footer><span>HOOO AI Executive HQ</span><span>Google Sheet 是唯一正式資料源</span></footer>
     </main>
   </div>
+
+  <dialog id="action-dialog">
+    <form id="action-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button>
+      <p class="eyebrow">CEO ACTION</p><h3 id="action-title">回覆項目</h3>
+      <p id="action-context" class="dialog-context"></p>
+      <input type="hidden" name="action"><input type="hidden" name="id"><input type="hidden" name="status">
+      <label>補充說明<textarea name="note" rows="4" placeholder="寫下你確認的條件、要調整的方向或原因"></textarea></label>
+      <p class="auth-note">送出時沿用目前登入的 Google 帳號與試算表權限。</p>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" id="action-submit" type="submit">送出並同步</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="income-dialog">
+    <form id="income-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button>
+      <p class="eyebrow">NEW INCOME</p><h3>新增收入</h3>
+      <div class="form-grid">
+        <label>日期<input name="date" type="date" required></label>
+        <label>客戶<input name="customer" required placeholder="例：公勝保經"></label>
+        <label class="span-2">專案<input name="project" required placeholder="例：業務菁英講座｜第二場"></label>
+        <label class="span-2">服務項目<select name="serviceId" id="income-service" required></select></label>
+        <label>數量<input name="quantity" type="number" min="0" step="0.01" value="1" required></label>
+        <label>單價<input name="unitPrice" type="number" min="0" required></label>
+        <label>應收金額<input name="amountDue" type="number" min="0" required></label>
+        <label>已收金額<input name="amountReceived" type="number" min="0" value="0" required></label>
+        <label>收款方式<select name="paymentMethod"><option>轉帳</option><option>現金</option><option>信用卡</option><option>第三方支付</option><option>—</option><option>其他</option></select></label>
+        <label>發票狀態<select name="invoiceStatus"><option>待開立</option><option>已開立</option><option>不開立</option><option>作廢</option></select></label>
+        <label>收款狀態<select name="paymentStatus"><option>待收款</option><option>部分收款</option><option>已收款</option><option>免費合作</option><option>取消</option></select></label>
+        <label>負責人<input name="owner" value="CEO"></label>
+        <label class="span-2">備註<textarea name="note" rows="3"></textarea></label>
+        <p class="auth-note span-2">送出時沿用目前登入的 Google 帳號與試算表權限。</p>
+      </div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" id="income-submit" type="submit">新增收入</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="expense-dialog">
+    <form id="expense-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button>
+      <p class="eyebrow">NEW EXPENSE</p><h3>新增支出</h3>
+      <div class="form-grid">
+        <label>日期<input name="date" type="date" required></label>
+        <label>成本屬性<select name="costType" id="expense-cost-type"><option>固定成本</option><option selected>變動成本</option></select></label>
+        <label>費用類別<select name="category" id="expense-category" required></select></label>
+        <label class="span-2">專案<input name="project" required placeholder="例：業務菁英講座｜公勝場"></label>
+        <label>支出項目<input name="item" required placeholder="例：講師費"></label>
+        <label>供應商／收款人<input name="payee" required placeholder="例：Jeffery"></label>
+        <label>數量<input name="quantity" type="number" min="0" step="0.01" value="1" required></label>
+        <label>單價<input name="unitPrice" type="number" min="0" required></label>
+        <label>應付金額<input name="amountDue" type="number" min="0" required></label>
+        <label>已付金額<input name="amountPaid" type="number" min="0" value="0" required></label>
+        <label>付款方式<select name="paymentMethod"><option>轉帳</option><option>現金</option><option>信用卡</option><option>第三方支付</option><option>其他</option></select></label>
+        <label>憑證狀態<select name="receiptStatus"><option>待補</option><option>發票</option><option>收據</option><option>無</option><option>其他</option></select></label>
+        <label>付款狀態<select name="paymentStatus"><option>待付款</option><option>部分付款</option><option>已付款</option><option>取消</option></select></label>
+        <label>負責人<input name="owner" value="CEO"></label>
+        <label class="span-2">備註<textarea name="note" rows="3"></textarea></label>
+        <p class="auth-note span-2">送出時沿用目前登入的 Google 帳號與試算表權限。</p>
+      </div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button expense-button" id="expense-submit" type="submit">新增支出</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="cost-category-dialog">
+    <form id="cost-category-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button>
+      <p class="eyebrow">COST CATEGORY</p><h3 id="cost-category-title">新增費用類別</h3>
+      <input type="hidden" name="id">
+      <div class="form-grid">
+        <label>成本屬性<select name="costType"><option>固定成本</option><option>變動成本</option></select></label>
+        <label>狀態<select name="status"><option>啟用</option><option>停用</option></select></label>
+        <label class="span-2">費用類別名稱<input name="name" required placeholder="例：清潔費"></label>
+        <label class="span-2">備註<textarea name="note" rows="3" placeholder="說明這個類別何時使用"></textarea></label>
+        <p class="auth-note span-2">儲存後會同步到 Google 試算表，並更新新支出的分類選單。</p>
+      </div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存類別</button></div>
+    </form>
+  </dialog>
+  <dialog id="inbox-dialog">
+    <form id="inbox-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button>
+      <p class="eyebrow">DAILY INBOX</p><h3>新增今日事項</h3>
+      <p class="dialog-context">不用先想完整：先收進來，之後再由三位主管協助分類、承接目標與轉成正式任務。</p>
+      <div class="form-grid">
+        <label class="span-2">事項內容<textarea name="content" rows="3" required placeholder="例：我想要規劃 LINE 官方帳號的迎新與分眾流程"></textarea></label>
+        <label>事項類型<select name="itemType"><option>待辦</option><option>待討論</option><option>想法</option><option>風險</option><option>決策需求</option></select></label>
+        <label>工作類別<select name="category" id="inbox-category"></select></label>
+        <label>歸屬目標<select name="goalId" id="inbox-goal"></select></label>
+        <label>優先級<select name="priority"><option>P0</option><option selected>P1</option><option>P2</option></select></label>
+        <label>專案／主題<input name="project" placeholder="例：自媒體"></label>
+        <label>主責<input name="owner" value="CEO"></label>
+        <label>期限<input name="due" type="date"></label>
+        <label class="span-2">下一步<input name="next" placeholder="例：先盤點帳號與現有資料"></label>
+        <label class="span-2">需要決策<textarea name="decision" rows="2" placeholder="若還不需要決策可留空"></textarea></label>
+        <p class="auth-note span-2">送出後先進入「每日新增事項」，不會直接變成正式任務。</p>
+      </div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">收進今日事項</button></div>
+    </form>
+  </dialog>
+  <iframe id="write-target" name="write-target" hidden></iframe>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./assets/config.js"></script>
   <script src="./assets/app.js" defer></script>
 </body>
