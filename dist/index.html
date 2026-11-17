@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132334">
+  <meta name="description" content="HOOO AI Executive HQ｜CEO 戰情室、任務、決策、會議與三位 AI 主管進度。">
+  <title>HOOO AI Executive HQ</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主要導覽">
+      <div class="brand-lockup">
+        <div class="brand-mark">H</div>
+        <div>
+          <p class="eyebrow">HOOO IMAGE</p>
+          <h1>Executive HQ</h1>
+        </div>
+      </div>
+      <nav class="nav-list">
+        <button class="nav-item is-active" data-view="overview"><span>01</span>CEO 總覽</button>
+        <button class="nav-item" data-view="tasks"><span>02</span>共同任務</button>
+        <button class="nav-item" data-view="revenue"><span>03</span>營收衝刺</button>
+        <button class="nav-item" data-view="governance"><span>04</span>決策與會議</button>
+        <button class="nav-item" data-view="executives"><span>05</span>三位主管</button>
+      </nav>
+      <div class="sidebar-foot">
+        <p>資料主檔</p>
+        <a data-sheet-link target="_blank" rel="noopener">開啟 Google Sheet ↗</a>
+        <small id="sync-time">讀取資料中…</small>
+      </div>
+    </aside>
+
+    <main id="main" class="main-panel">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">CEO COMMAND CENTER</p>
+          <h2 id="page-title">今天最重要的事</h2>
+        </div>
+        <div class="topbar-actions">
+          <span class="snapshot-badge"><i></i>資料快照</span>
+          <a class="button secondary" data-sheet-link target="_blank" rel="noopener">原始資料 ↗</a>
+        </div>
+      </header>
+
+      <section class="view is-visible" data-view-panel="overview">
+        <div class="hero-grid">
+          <article class="hero-card">
+            <div class="hero-copy">
+              <p class="eyebrow light">30 DAY REVENUE SPRINT</p>
+              <h3>把網站的信任，轉成第一批團隊講座。</h3>
+              <p>第一波主力：業務團隊 2 小時「客戶信任競爭力實戰課」。先取得主辦方洽談，再用一對多講座承接個人服務與西服需求。</p>
+              <div class="hero-actions">
+                <a class="button light" href="https://hoooimage.com/business-elite-trust" target="_blank" rel="noopener">查看主力課程 ↗</a>
+                <button class="button ghost" data-jump="revenue">查看衝刺任務</button>
+              </div>
+            </div>
+            <div class="hero-signal" aria-label="營收路徑">
+              <div><strong>01</strong><span>主辦方名單</span></div>
+              <div><strong>02</strong><span>洽談與提案</span></div>
+              <div><strong>03</strong><span>團隊講座</span></div>
+              <div><strong>04</strong><span>課後分流</span></div>
+            </div>
+          </article>
+
+          <article class="meeting-card">
+            <p class="eyebrow">NEXT DECISION</p>
+            <div class="date-lockup"><span>18</span><small>NOV<br>WED</small></div>
+            <h3>IMAGESUIT 合作條件討論</h3>
+            <p>價格、人數、場地交通、開票、名單同意與課後承接。</p>
+            <span class="tag amber">M-004 · 待舉行</span>
+          </article>
+        </div>
+
+        <div id="kpi-grid" class="kpi-grid" aria-label="關鍵數字"></div>
+
+        <div class="two-column">
+          <section class="panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">CEO QUEUE</p><h3>等待你確認</h3></div>
+              <button class="text-button" data-jump="governance">查看全部</button>
+            </div>
+            <div id="decision-queue" class="stack-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">LATEST MOVEMENT</p><h3>最新進度</h3></div>
+              <span class="muted">只顯示最近更新</span>
+            </div>
+            <div id="progress-feed" class="timeline"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="tasks">
+        <section class="panel full-height">
+          <div class="panel-head task-head">
+            <div><p class="eyebrow">SINGLE SOURCE OF TRUTH</p><h3>共同任務</h3></div>
+            <div class="filters" aria-label="任務篩選">
+              <label><span class="sr-only">搜尋任務</span><input id="task-search" type="search" placeholder="搜尋任務、負責人或專案"></label>
+              <label><span class="sr-only">狀態</span><select id="status-filter"><option value="">所有狀態</option></select></label>
+              <label><span class="sr-only">主管</span><select id="owner-filter"><option value="">所有部門</option></select></label>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>任務</th><th>負責</th><th>優先</th><th>狀態</th><th>期限</th><th>下一步</th></tr></thead>
+              <tbody id="task-table"></tbody>
+            </table>
+          </div>
+          <p id="task-empty" class="empty-state" hidden>沒有符合條件的任務。</p>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="revenue">
+        <div class="section-intro">
+          <div><p class="eyebrow">BUSINESS ELITE TRUST</p><h3>第一波營收作戰圖</h3></div>
+          <p>不是等待網站自然流量，而是主動找到能安排一對多講座的業務團隊主辦人。</p>
+        </div>
+        <div class="funnel" aria-label="營收漏斗">
+          <div><span>30</span><small>主辦方名單</small></div><i>→</i>
+          <div><span>8</span><small>有效洽談</small></div><i>→</i>
+          <div><span>3</span><small>正式提案</small></div><i>→</i>
+          <div><span>1–2</span><small>試辦場次</small></div>
+        </div>
+        <div id="revenue-tasks" class="card-grid"></div>
+        <section class="panel split-panel">
+          <div>
+            <p class="eyebrow">AFTER THE WORKSHOP</p>
+            <h3>課後雙軌承接</h3>
+            <p>名單必須經過明確同意，完整名單不直接共享；學員主動勾選需求後才進入後續服務。</p>
+          </div>
+          <div class="branch-grid">
+            <div><span>HOOO</span><strong>個人形象服務</strong><p>色彩、形象策略、重要場合與長期陪跑。</p></div>
+            <div><span>IMAGESUIT</span><strong>西服方案</strong><p>明確勾選西服需求後，交由合作夥伴承接。</p></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="governance">
+        <div class="two-column governance-grid">
+          <section class="panel">
+            <div class="panel-head"><div><p class="eyebrow">DECISIONS</p><h3>決策紀錄</h3></div></div>
+            <div id="decision-list" class="decision-list"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><p class="eyebrow">MEETINGS</p><h3>會議節奏</h3></div></div>
+            <div id="meeting-list" class="meeting-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="executives">
+        <div class="section-intro">
+          <div><p class="eyebrow">EXECUTIVE TEAM</p><h3>三位主管工作入口</h3></div>
+          <p>三個視角、同一份任務主檔。每天早上 08:00 各提出一項最重要議題。</p>
+        </div>
+        <div id="executive-grid" class="executive-grid"></div>
+      </section>
+
+      <footer>
+        <p>HOOO AI Executive HQ · Private management dashboard</p>
+        <p>網站負責呈現；Google Sheet 仍是正式任務、決策與進度主檔。</p>
+      </footer>
+    </main>
+  </div>
+  <script src="./assets/app.js" defer></script>
+</body>
+</html>
