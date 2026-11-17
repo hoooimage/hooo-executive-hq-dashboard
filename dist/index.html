@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#132334">
+  <meta name="theme-color" content="#bf2f70">
   <meta name="description" content="HOOO AI Executive HQ｜CEO 戰情室、任務、決策、會議與三位 AI 主管進度。">
   <title>HOOO AI Executive HQ</title>
   <link rel="stylesheet" href="./assets/styles.css">
@@ -13,10 +13,10 @@
   <div class="app-shell">
     <aside class="sidebar" aria-label="主要導覽">
       <div class="brand-lockup">
-        <div class="brand-mark">H</div>
+        <img class="brand-logo" src="./assets/hooo-logo.png" alt="好圈圈 Hooo Image">
         <div>
-          <p class="eyebrow">HOOO IMAGE</p>
-          <h1>Executive HQ</h1>
+          <p class="eyebrow">好感 · 形象 · 連結</p>
+          <h1>AI Executive HQ</h1>
         </div>
       </div>
       <nav class="nav-list">
@@ -29,18 +29,19 @@
       <div class="sidebar-foot">
         <p>資料主檔</p>
         <a data-sheet-link target="_blank" rel="noopener">開啟 Google Sheet ↗</a>
-        <small id="sync-time">讀取資料中…</small>
+        <small id="sync-time">正在連線試算表…</small>
       </div>
     </aside>
 
     <main id="main" class="main-panel">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CEO COMMAND CENTER</p>
+          <p class="eyebrow">HOOO CEO COMMAND CENTER</p>
           <h2 id="page-title">今天最重要的事</h2>
         </div>
         <div class="topbar-actions">
-          <span class="snapshot-badge"><i></i>資料快照</span>
+          <span class="snapshot-badge" id="sync-badge"><i></i><span>正在同步</span></span>
+          <button class="button sync-button" id="sync-now" type="button">同步最新資料</button>
           <a class="button secondary" data-sheet-link target="_blank" rel="noopener">原始資料 ↗</a>
         </div>
       </header>
@@ -49,7 +50,7 @@
         <div class="hero-grid">
           <article class="hero-card">
             <div class="hero-copy">
-              <p class="eyebrow light">30 DAY REVENUE SPRINT</p>
+              <p class="eyebrow light">30 DAY REVENUE SPRINT · 好感成交</p>
               <h3>把網站的信任，轉成第一批團隊講座。</h3>
               <p>第一波主力：業務團隊 2 小時「客戶信任競爭力實戰課」。先取得主辦方洽談，再用一對多講座承接個人服務與西服需求。</p>
               <div class="hero-actions">
@@ -162,11 +163,12 @@
       </section>
 
       <footer>
-        <p>HOOO AI Executive HQ · Private management dashboard</p>
-        <p>網站負責呈現；Google Sheet 仍是正式任務、決策與進度主檔。</p>
+        <p>HOOO AI Executive HQ · 好圈圈經營戰情室</p>
+        <p>網站只呈現必要資訊；Google Sheet 是唯一任務、決策與進度主檔。</p>
       </footer>
     </main>
   </div>
+  <script src="./assets/config.js"></script>
   <script src="./assets/app.js" defer></script>
 </body>
 </html>
