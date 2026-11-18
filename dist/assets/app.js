@@ -350,6 +350,34 @@ function renderTasks(){
   document.querySelector('#task-list').innerHTML=rows.length?rows.map(task=>{const due=localDay(task['期限']),overdue=due&&due<today&&task['狀態']!=='完成';return `<article class="task-item ${overdue?'is-overdue':''}"><div class="task-item-main"><div class="task-item-meta"><span>${esc(task.id)}</span><b>${esc(task['工作線 id'])} · ${esc(streamMap[task['工作線 id']]||'')}</b>${overdue?'<em>已過期</em>':''}</div><h4>${esc(task['待辦'])}</h4><p>${esc(task['下一步']||'尚未填寫下一步')}</p>${task['來源文件']?`<a href="${esc(task['來源文件'])}" target="_blank" rel="noopener">來源文件 ↗</a>`:''}</div><div class="task-item-side"><label>狀態<select data-new-task-status="${esc(task.id)}" data-current-status="${esc(task['狀態'])}">${['未開始','進行中','等待中','完成'].map(status=>`<option ${task['狀態']===status?'selected':''}>${status}</option>`).join('')}</select></label><span>${esc(task['負責人']||'圈圈')}</span><time>${task['期限']?esc(task['期限']):'無固定期限'}</time></div></article>`;}).join(''):'<div class="overview-empty"><strong>沒有符合條件的待辦</strong><span>請調整篩選條件。</span></div>';
 }
 
+function sortedMetrics() {
+  return [...state.metrics].filter(row=>localDay(row['日期'])).sort((a,b)=>localDay(a['日期'])-localDay(b['日期']));
+}
+
+function renderMetrics() {
+  const rows=sortedMetrics(),latest=rows.at(-1)||{},previous=rows.at(-2)||{};
+  const cards=[['IG 粉絲','IG 粉絲','人'],['FB 粉絲','FB 粉絲','人'],['LINE 好友','LINE 好友','人'],['講座報名','講座報名','人'],['見證數','見證數','份'],['本週發文','發文數','則'],['本週短影音','短影音數','支']];
+  document.querySelector('#metrics-latest').innerHTML=cards.map(([label,key,unit])=>{const value=numeric(latest[key]),hasPrevious=previous[key]!==''&&previous[key]!=null,delta=value-numeric(previous[key]);return `<article><span>${esc(label)}</span><strong>${value.toLocaleString('zh-TW')}<small>${unit}</small></strong><p class="${hasPrevious&&delta<0?'negative':''}">${hasPrevious?`比上週 ${delta>=0?'+':''}${delta}`:'第一筆基準'}</p></article>`;}).join('');
+
+  if(!rows.length){document.querySelector('#metrics-chart').innerHTML='<div class="overview-empty"><strong>尚未有數字紀錄</strong><span>新增第一筆後就會產生趨勢圖。</span></div>';document.querySelector('#metrics-table').innerHTML='';return;}
+  const series=[['IG 粉絲','#bf2f70'],['FB 粉絲','#4f80b2'],['LINE 好友','#36745f']];
+  const width=820,height=270,left=50,right=18,top=22,bottom=42,plotW=width-left-right,plotH=height-top-bottom;
+  const max=Math.max(1,...rows.flatMap(row=>series.map(([key])=>numeric(row[key]))));
+  const x=index=>left+(rows.length===1?plotW/2:index*plotW/(rows.length-1));
+  const y=value=>top+plotH-(numeric(value)/max*plotH);
+  const grid=Array.from({length:5},(_,index)=>{const value=Math.round(max*(4-index)/4),py=top+plotH*index/4;return `<g><line x1="${left}" y1="${py}" x2="${width-right}" y2="${py}"/><text x="${left-8}" y="${py+3}" text-anchor="end">${value}</text></g>`;}).join('');
+  const lines=series.map(([key,color])=>{const points=rows.map((row,index)=>`${x(index)},${y(row[key])}`).join(' ');const dots=rows.map((row,index)=>`<circle cx="${x(index)}" cy="${y(row[key])}" r="3.5"><title>${esc(row['日期'])}｜${esc(key)} ${numeric(row[key])}</title></circle>`).join('');return `<g class="metric-line" style="--line-color:${color}"><polyline points="${points}"/>${dots}</g>`;}).join('');
+  const labelStep=Math.max(1,Math.ceil(rows.length/7));
+  const labels=rows.map((row,index)=>(index%labelStep===0||index===rows.length-1)?`<text x="${x(index)}" y="${height-14}" text-anchor="middle">${dateLabel(row['日期'])}</text>`:'').join('');
+  document.querySelector('#metrics-chart').innerHTML=`<div class="metric-chart-legend">${series.map(([key,color])=>`<span><i style="background:${color}"></i>${key}</span>`).join('')}<b>最新：${esc(latest['日期']||'—')}</b></div><div class="metric-svg-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="IG、Facebook 與 LINE 好友的每週趨勢"><g class="metric-grid">${grid}</g>${lines}<g class="metric-axis-labels">${labels}</g></svg></div>`;
+  document.querySelector('#metrics-table').innerHTML=[...rows].reverse().map(row=>`<tr><td><strong>${esc(row['日期'])}</strong></td><td>${numeric(row['IG 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['FB 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['LINE 好友']).toLocaleString('zh-TW')}</td><td>${numeric(row['講座報名']).toLocaleString('zh-TW')}</td><td>${numeric(row['見證數']).toLocaleString('zh-TW')}</td><td>${numeric(row['發文數']).toLocaleString('zh-TW')}</td><td>${numeric(row['短影音數']).toLocaleString('zh-TW')}</td><td>${esc(row['備註']||'—')}</td></tr>`).join('');
+}
+
+function renderDocs() {
+  const rows=[...state.docs].sort((a,b)=>(localDay(b['最後更新日'])?.getTime()||0)-(localDay(a['最後更新日'])?.getTime()||0));
+  document.querySelector('#docs-grid').innerHTML=rows.length?rows.map((doc,index)=>`<a class="doc-card" href="${esc(doc['連結'])}" target="_blank" rel="noopener"><header><span>${String(index+1).padStart(2,'0')}</span><b>${doc['最後更新日']?`更新 ${esc(doc['最後更新日'])}`:'尚未標註更新日'}</b></header><h3>${esc(doc['名稱'])}</h3><p>${esc(doc['用途'])}</p><footer>開啟文件 <span>↗</span></footer></a>`).join(''):'<div class="overview-empty"><strong>尚未建立文件索引</strong><span>請在 Docs 工作表新增資料。</span></div>';
+}
+
 function financeRows(rows) {
   const active=rows.filter(row=>!['取消','作廢'].includes(row['收款狀態']||row['付款狀態']));
   if(state.financeMode==='all') return active;
@@ -393,6 +421,36 @@ function renderProjectProfit(income,expenses) {
   document.querySelector('#project-profit').innerHTML=rows.length?rows.map(([name,v])=>`<article><div><strong>${esc(name)}</strong><small>營收 ${money(v.income)} · 成本 ${money(v.cost)}</small></div><b class="${v.income-v.cost<0?'negative':''}">${money(v.income-v.cost)}</b></article>`).join(''):'<p class="empty-state">目前期間尚無專案收支。</p>';
 }
 
+function renderFinancePlan() {
+  const target=numeric(settingValue('月營收目標'))||250000,effective=String(settingValue('目標生效月')||'2027-03');
+  const targetDate=state.financeMode==='month'?new Date(Number(state.financeYear),Number(state.financeMonth)-1,1):new Date(now.getFullYear(),now.getMonth(),1);
+  const period=`${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}`;
+  const received=state.income.filter(row=>{const d=localDay(row['日期']);return d&&d.getFullYear()===targetDate.getFullYear()&&d.getMonth()===targetDate.getMonth();}).reduce((sum,row)=>sum+numeric(row['已收金額']),0);
+  const active=period>=effective,pct=target?Math.round(received/target*100):0;
+  document.querySelector('#revenue-target-card').innerHTML=`<div><p class="eyebrow">MONTHLY TARGET</p><span>${targetDate.getFullYear()} 年 ${targetDate.getMonth()+1} 月</span></div><div class="target-main"><strong>${active?`${Math.min(pct,999)}%`:'準備期'}</strong><p>${money(received)} <span>／ ${money(target)}</span></p></div><div class="target-progress"><i style="width:${Math.min(100,pct)}%"></i></div><small>${active?`距離目標還有 ${money(Math.max(0,target-received))}`:`目標自 ${effective.replace('-',' 年 ')} 月起生效，目前先完成服務與獲客建置。`}</small>`;
+
+  const end=localDay(settingValue('阿默合約結束日')||'2027-03-31'),today=localDay(new Date());
+  const remaining=end&&end>=today?((end.getFullYear()-today.getFullYear())*12+end.getMonth()-today.getMonth()+1):0;
+  document.querySelector('#amo-contract-card').innerHTML=`<div><p class="eyebrow">AMO CONTRACT</p><span>大型企業合作收入</span></div><strong>${remaining}<small> 個月</small></strong><h3>阿默合約剩餘月份</h3><p>合約至 ${end?end.toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'}):'尚未設定'}</p><small>${remaining?`續約或接替企業案要在到期前完成提案。`:'合約已到期，請更新續約或接替方案。'}</small>`;
+}
+
+function serviceLineName(row) {
+  const service=state.services.find(item=>item['服務ID']===row['服務ID'])||{},category=String(service['類別']||''),text=`${row['服務項目']||''} ${row['專案']||''}`;
+  if(/網站|建站|系統|Idealflow/i.test(text)) return '建站與系統';
+  if(category==='個人形象') return '個人形象';
+  if(category==='企業顧問') return '企業顧問';
+  if(category==='主題講座'||category==='企業培訓') return '講座與內訓';
+  if(category==='甜甜圈高球') return '甜甜圈高球';
+  return '其他';
+}
+
+function renderServiceDistribution(income) {
+  const order=['個人形象','企業顧問','講座與內訓','建站與系統','甜甜圈高球','其他'],totals=Object.fromEntries(order.map(name=>[name,0]));
+  income.forEach(row=>totals[serviceLineName(row)]+=numeric(row['應收金額']));
+  const grand=Object.values(totals).reduce((sum,value)=>sum+value,0);
+  document.querySelector('#service-line-distribution').innerHTML=order.map(name=>{const value=totals[name],pct=grand?Math.round(value/grand*100):0;return `<article><header><strong>${name}</strong><span>${money(value)} · ${pct}%</span></header><div><i style="width:${pct}%"></i></div></article>`;}).join('')+(grand?'':'<p class="chart-empty">目前期間尚未有付費營收，新增後會自動分配到服務線。</p>');
+}
+
 function renderExpenseCategoryOptions() {
   const type=document.querySelector('#expense-cost-type').value||'變動成本',select=document.querySelector('#expense-category'),current=select.value;
   const rows=state.costCategories.filter(c=>c['成本屬性']===type&&c['狀態']!=='停用');
@@ -408,8 +466,9 @@ function renderCostCategories() {
 function renderRevenue() {
   renderFinanceControls();
   const income=financeRows(state.income),expenses=financeRows(state.expenses),totals=financeTotals(income,expenses);
+  renderFinancePlan();
   document.querySelector('#revenue-kpis').innerHTML=[['營收',money(totals.revenue),'應收總額'],['成本',money(totals.cost),`固定 ${money(totals.fixedCost)} · 變動 ${money(totals.variableCost)}`],['損益',money(totals.revenue-totals.cost),'營收－成本'],['現金淨流',money(totals.received-totals.paid),'實收－實付'],['實收',money(totals.received),'已入帳'],['待收',money(totals.receivable),'應收帳款'],['實付',money(totals.paid),'已付款'],['待付',money(totals.payable),'應付帳款']].map((x,i)=>`<article class="kpi-card finance-kpi ${i===2&&totals.revenue-totals.cost<0?'negative':''}"><p>${x[0]}</p><strong>${x[1]}</strong><small>${x[2]}</small></article>`).join('');
-  renderFinanceTrend();renderProjectProfit(income,expenses);
+  renderFinanceTrend();renderProjectProfit(income,expenses);renderServiceDistribution(income);
   const cats=[...new Set(state.services.map(x=>x['類別']).filter(Boolean))];
   document.querySelector('#service-filters').innerHTML=`<button class="chip ${!state.serviceCategory?'active':''}" data-service-category="">全部服務</button>`+cats.map(x=>`<button class="chip ${state.serviceCategory===x?'active':''}" data-service-category="${esc(x)}">${esc(x)}</button>`).join('');
   const services=state.services.filter(x=>!state.serviceCategory||x['類別']===state.serviceCategory);
@@ -492,6 +551,7 @@ function renderCalendar(){
 function openTaskDialog(){const form=document.querySelector('#task-form');form.reset();form.elements.owner.value='圈圈';form.elements.status.value='未開始';form.elements.workstreamId.value=state.taskWorkstream||state.workstreams[0]?.id||'';document.querySelector('#task-dialog').showModal();}
 function openDecisionDialog(item){const form=document.querySelector('#decision-form');form.reset();const record=Boolean(item);document.querySelector('#decision-dialog-title').textContent=record?'記錄決定':'新增待決定';form.elements.action.value=record?'decisionRecord':'decisionNew';form.elements.id.value=item?.id||'';form.elements.title.value=item?.['事項']||'';form.elements.options.value=item?.['選項']||'';form.elements.people.value=item?.['一起決定的人']||'';form.elements.due.value=item?.['決定期限']||'';form.elements.decisionDate.value=localIso(new Date());form.elements.finalDecision.required=record;document.querySelectorAll('.decision-record-only').forEach(el=>el.hidden=!record);document.querySelectorAll('.followup-fields').forEach(el=>el.hidden=true);document.querySelector('#decision-dialog').showModal();}
 function openEventDialog(date='',vacancy=''){const form=document.querySelector('#event-form');form.reset();form.elements.date.value=date||localIso(new Date());form.elements.period.value=vacancy.includes('上午')?'上午':vacancy.includes('下午')?'下午':'全天';form.elements.type.value='其他工作';if(vacancy)form.elements.title.placeholder=`這段${vacancy}要安排什麼？`;document.querySelector('#event-dialog').showModal();}
+function openMetricsDialog(){const form=document.querySelector('#metrics-form'),latest=sortedMetrics().at(-1)||{};form.reset();form.elements.date.value=localIso(new Date());form.elements.ig.value=numeric(latest['IG 粉絲']);form.elements.fb.value=numeric(latest['FB 粉絲']);form.elements.line.value=numeric(latest['LINE 好友']);form.elements.registrations.value=numeric(latest['講座報名']);form.elements.testimonials.value=numeric(latest['見證數']);form.elements.posts.value=numeric(latest['發文數']);form.elements.videos.value=numeric(latest['短影音數']);document.querySelector('#metrics-dialog').showModal();}
 
 function submitSimpleForm(event){event.preventDefault();const form=event.currentTarget,params=Object.fromEntries(new FormData(form).entries());if(postForm(params))form.closest('dialog').close();}
 function submitDecisionForm(event){event.preventDefault();const form=event.currentTarget,params=Object.fromEntries(new FormData(form).entries());params.createFollowup=form.elements.createFollowup.checked?'yes':'';if(postForm(params))form.closest('dialog').close();}
@@ -573,7 +633,7 @@ function applyData(data,source){
   document.querySelectorAll('[data-sheet-link]').forEach(a=>a.href=data.sourceUrl||'https://docs.google.com/spreadsheets/d/1omzCYbgnZ7uSJWlIjvbAaVBfv0no-GJzkLeInVKEx_c/edit');
   const stamp=new Date(data.generatedAt||Date.now()).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
   document.querySelector('#sync-time').textContent=`${source==='live'?'即時同步':'備援快照'}：${stamp}`; setSync(source==='live'?'live':'fallback',source==='live'?'已連線試算表':'使用備援快照');
-  renderOverview();renderGoals();renderKpis();renderInbox();renderWorkOverview();renderDaily();populateTaskFilters();renderTasks();renderDecisionsNew();renderCalendar();renderRevenue();renderExecutives();
+  renderOverview();renderGoals();renderKpis();renderInbox();renderWorkOverview();renderDaily();populateTaskFilters();renderTasks();renderDecisionsNew();renderCalendar();renderMetrics();renderRevenue();renderDocs();renderExecutives();
 }
 
 async function syncData(){
@@ -602,7 +662,7 @@ document.addEventListener('click',event=>{
   const calendarMode=event.target.closest('[data-calendar-mode]');if(calendarMode){state.calendarMode=calendarMode.dataset.calendarMode;renderCalendar();}
   const calendarShift=event.target.closest('[data-calendar-shift]');if(calendarShift){state.calendarMonth=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth()+Number(calendarShift.dataset.calendarShift),1);renderCalendar();}
   const floating=event.target.closest('#floating-add');if(floating){const menu=document.querySelector('#quick-add-menu');menu.hidden=!menu.hidden;return;}
-  const quick=event.target.closest('[data-quick-add]');if(quick){document.querySelector('#quick-add-menu').hidden=true;({task:openTaskDialog,decision:()=>openDecisionDialog(null),event:()=>openEventDialog(),income:()=>document.querySelector('#add-income').click(),expense:()=>document.querySelector('#add-expense').click()})[quick.dataset.quickAdd]?.();}
+  const quick=event.target.closest('[data-quick-add]');if(quick){document.querySelector('#quick-add-menu').hidden=true;({task:openTaskDialog,decision:()=>openDecisionDialog(null),event:()=>openEventDialog(),metrics:openMetricsDialog,income:()=>document.querySelector('#add-income').click(),expense:()=>document.querySelector('#add-expense').click()})[quick.dataset.quickAdd]?.();}
 });
 document.querySelector('#task-workstream-filter').addEventListener('change',event=>{state.taskWorkstream=event.target.value;renderTasks();});
 document.querySelector('#task-status-filter').addEventListener('change',event=>{state.taskStatus=event.target.value;renderTasks();});
@@ -616,6 +676,7 @@ document.querySelector('#add-expense').addEventListener('click',()=>{const form=
 document.querySelector('#add-cost-category').addEventListener('click',()=>openCostCategory(null));
 ['add-inbox-item','add-inbox-item-small'].forEach(id=>document.querySelector('#'+id).addEventListener('click',openInbox));
 document.querySelector('#add-task').addEventListener('click',openTaskDialog);document.querySelector('#add-decision').addEventListener('click',()=>openDecisionDialog(null));document.querySelector('#add-event').addEventListener('click',()=>openEventDialog());
+document.querySelector('#add-metrics').addEventListener('click',openMetricsDialog);
 document.querySelector('#expense-cost-type').addEventListener('change',renderExpenseCategoryOptions);
 document.querySelector('#action-form').addEventListener('submit',submitAction);
 document.querySelector('#income-form').addEventListener('submit',submitIncome);
@@ -623,6 +684,7 @@ document.querySelector('#expense-form').addEventListener('submit',submitExpense)
 document.querySelector('#cost-category-form').addEventListener('submit',submitCostCategory);
 document.querySelector('#inbox-form').addEventListener('submit',submitInbox);
 document.querySelector('#task-form').addEventListener('submit',submitSimpleForm);document.querySelector('#decision-form').addEventListener('submit',submitDecisionForm);document.querySelector('#event-form').addEventListener('submit',submitSimpleForm);
+document.querySelector('#metrics-form').addEventListener('submit',submitSimpleForm);
 document.querySelector('#decision-form').elements.createFollowup.addEventListener('change',event=>document.querySelectorAll('.followup-fields').forEach(el=>el.hidden=!event.target.checked));
 document.querySelector('#event-type').innerHTML=eventTypes.map(type=>`<option>${type}</option>`).join('');
 document.addEventListener('change',event=>{const select=event.target.closest('[data-new-task-status]');if(!select)return;const old=select.dataset.currentStatus,newStatus=select.value;if(!WRITE_ENDPOINT){select.value=old;showToast('網站寫入尚未啟用，請先到 Google Sheet 更新',false);return;}postForm({action:'taskNewStatus',id:select.dataset.newTaskStatus,status:newStatus});select.dataset.currentStatus=newStatus;});

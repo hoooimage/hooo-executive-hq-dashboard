@@ -127,6 +127,26 @@ function applyAction_(p) {
     sheet.getRange(row, 1, 1, 7).setValues([[id, date, period, type, title, String(p.location || ''), String(p.note || '')]]);
     return { ok: true, message: id + ' 已新增到行事曆' };
   }
+  if (p.action === 'metricNew') {
+    const date = cleanDate_(p.date);
+    if (!date) throw new Error('請填寫數字紀錄日期');
+    const sheet = spreadsheet.getSheetByName('Metrics');
+    const lastRow = sheet.getLastRow();
+    let row = 0;
+    if (lastRow >= 5) {
+      const dates = sheet.getRange(5, 1, lastRow - 4, 1).getDisplayValues();
+      const index = dates.findIndex(item => String(item[0] || '').trim() === date);
+      if (index >= 0) row = index + 5;
+    }
+    const updating = row > 0;
+    if (!row) row = Math.max(lastRow + 1, 5);
+    sheet.getRange(row, 1, 1, 9).setValues([[
+      date, finiteNumber_(p.ig), finiteNumber_(p.fb), finiteNumber_(p.line),
+      finiteNumber_(p.registrations), finiteNumber_(p.testimonials), finiteNumber_(p.posts),
+      finiteNumber_(p.videos), String(p.note || '')
+    ]]);
+    return { ok: true, message: date + (updating ? ' 的每週數字已更新' : ' 的每週數字已新增') };
+  }
   if (p.action === 'decision') {
     const status = String(p.status || '');
     if (!['已生效', '需調整', '待CEO確認'].includes(status)) throw new Error('不允許的決策狀態');

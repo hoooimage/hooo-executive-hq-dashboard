@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#bf2f70">
   <meta name="description" content="HOOO 好圈圈作戰儀表板｜準備期進度、待辦、待決定、行程、成效數字與收支。">
   <title>HOOO AI Executive HQ</title>
-  <link rel="stylesheet" href="./assets/styles.css?v=20261119-2">
+  <link rel="stylesheet" href="./assets/styles.css?v=20261119-3">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要內容</a>
@@ -117,11 +117,20 @@
         </section>
       </section>
 
-      <section class="view phase-placeholder-view" data-view-panel="metrics">
-        <div class="phase-placeholder">
-          <span>第 4 階段</span><h2>數字成效</h2><p>每週數字表單與趨勢圖會在第 4 階段完成；總覽已先顯示最新基準數字。</p>
-          <button class="button primary" data-jump="overview">回總覽看關鍵數字</button>
+      <section class="view" data-view-panel="metrics">
+        <div class="intro-row">
+          <div><p class="eyebrow">WEEKLY NUMBERS</p><h2>每週留下一筆，才看得見成長是不是正在發生。</h2></div>
+          <div class="ledger-actions"><button class="button primary" id="add-metrics">＋ 新增本週數字</button></div>
         </div>
+        <div id="metrics-latest" class="metric-summary-grid"></div>
+        <section class="panel metrics-chart-panel">
+          <div class="section-head"><div><p class="eyebrow">AUDIENCE TREND</p><h3>粉絲與 LINE 好友週趨勢</h3></div><span class="section-note">資料來自 Metrics 工作表</span></div>
+          <div id="metrics-chart" class="metrics-chart"></div>
+        </section>
+        <section class="panel metrics-history-panel">
+          <div class="section-head"><div><p class="eyebrow">WEEKLY RECORDS</p><h3>每週紀錄</h3></div><span class="section-note">新到舊</span></div>
+          <div class="table-wrap"><table class="metrics-table"><thead><tr><th>日期</th><th>IG</th><th>Facebook</th><th>LINE</th><th>講座報名</th><th>見證</th><th>發文</th><th>短影音</th><th>備註</th></tr></thead><tbody id="metrics-table"></tbody></table></div>
+        </section>
       </section>
 
       <section class="view" data-view-panel="finance">
@@ -144,6 +153,10 @@
             <label id="finance-month-wrap">月份<select id="finance-month"></select></label>
           </div>
         </section>
+        <div class="finance-plan-grid">
+          <section class="panel revenue-target-card" id="revenue-target-card"></section>
+          <section class="panel contract-card" id="amo-contract-card"></section>
+        </div>
         <div id="revenue-kpis" class="kpi-grid revenue-kpis"></div>
         <div class="two-column finance-insights">
           <section class="panel">
@@ -155,6 +168,10 @@
             <div id="project-profit" class="project-profit"></div>
           </section>
         </div>
+        <section class="panel service-distribution-panel">
+          <div class="section-head"><div><p class="eyebrow">REVENUE MIX</p><h3>依服務線的營收分布</h3></div><span class="section-note">依目前期間的應收金額</span></div>
+          <div id="service-line-distribution" class="service-line-distribution"></div>
+        </section>
         <section class="section-block">
           <div class="section-head"><div><p class="eyebrow">SERVICE CATALOG</p><h3>目前服務項目</h3></div><a class="text-button" href="https://hoooimage.com/" target="_blank" rel="noopener">參考官網 ↗</a></div>
           <div id="service-filters" class="project-tabs"></div>
@@ -216,11 +233,15 @@
         </section>
       </section>
 
-      <section class="view phase-placeholder-view" data-view-panel="docs">
-        <div class="phase-placeholder">
-          <span>第 4 階段</span><h2>文件</h2><p>文件索引與更新日期會在第 4 階段完成；規劃文件已先整理進 Google Sheet 的 Docs 工作表。</p>
-          <a class="button primary" data-sheet-link target="_blank" rel="noopener">開啟 Google Sheet</a>
+      <section class="view" data-view-panel="docs">
+        <div class="intro-row">
+          <div><p class="eyebrow">SOURCE OF TRUTH</p><h2>所有規劃文件，都從這裡找得到。</h2></div>
+          <p>新增文件只要在 Google Sheet 的 Docs 工作表增加一列，儀表板就會同步更新。</p>
         </div>
+        <section class="panel docs-panel">
+          <div class="section-head"><div><p class="eyebrow">DOCUMENT LIBRARY</p><h3>規劃文件</h3></div><a class="text-button" data-sheet-link target="_blank" rel="noopener">管理文件 ↗</a></div>
+          <div id="docs-grid" class="docs-grid"></div>
+        </section>
       </section>
 
       <footer><span>HOOO AI Executive HQ</span><span>Google Sheet 是唯一正式資料源</span></footer>
@@ -237,7 +258,7 @@
       <button data-view="metrics">數字成效</button><button data-view="finance">收支</button><button data-view="docs">文件</button>
     </div>
     <button class="floating-add" id="floating-add" type="button" aria-label="快速新增">＋</button>
-    <div class="quick-add-menu" id="quick-add-menu" hidden><button data-quick-add="task">新增待辦</button><button data-quick-add="decision">新增待決定</button><button data-quick-add="event">新增行程</button><button data-quick-add="income">新增收入</button><button data-quick-add="expense">新增支出</button></div>
+    <div class="quick-add-menu" id="quick-add-menu" hidden><button data-quick-add="task">新增待辦</button><button data-quick-add="decision">新增待決定</button><button data-quick-add="event">新增行程</button><button data-quick-add="metrics">新增本週數字</button><button data-quick-add="income">新增收入</button><button data-quick-add="expense">新增支出</button></div>
   </div>
 
   <dialog id="task-dialog">
@@ -263,6 +284,15 @@
       <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">EVENT</p><h3>新增行程</h3><input type="hidden" name="action" value="eventNew">
       <div class="form-grid"><label>日期<input name="date" type="date" required></label><label>時段<select name="period"><option>全天</option><option>上午</option><option>下午</option><option>晚上</option></select></label><label>類型<select name="type" id="event-type"></select></label><label>標題<input name="title" required></label><label class="span-2">地點<input name="location"></label><label class="span-2">備註<textarea name="note" rows="3"></textarea></label></div>
       <p class="auth-note">空檔指定用途後，會變成一筆正式行程。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存行程</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="metrics-dialog">
+    <form id="metrics-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">WEEKLY NUMBERS</p><h3>新增本週數字</h3><input type="hidden" name="action" value="metricNew">
+      <p class="dialog-context">已帶入上一筆數字，只要修改本週有變動的欄位。</p>
+      <div class="form-grid"><label>日期<input name="date" type="date" required></label><label>IG 粉絲<input name="ig" type="number" min="0" required></label><label>FB 粉絲<input name="fb" type="number" min="0" required></label><label>LINE 好友<input name="line" type="number" min="0" required></label><label>講座報名<input name="registrations" type="number" min="0" required></label><label>見證數<input name="testimonials" type="number" min="0" required></label><label>本週發文數<input name="posts" type="number" min="0" required></label><label>本週短影音數<input name="videos" type="number" min="0" required></label><label class="span-2">備註<textarea name="note" rows="3"></textarea></label></div>
+      <p class="auth-note">同一日期再次儲存時會更新該週，不會建立重複資料。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存本週數字</button></div>
     </form>
   </dialog>
 
@@ -367,6 +397,6 @@
   <iframe id="write-target" name="write-target" hidden></iframe>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./assets/config.js"></script>
-  <script src="./assets/app.js?v=20261119-2" defer></script>
+  <script src="./assets/app.js?v=20261119-3" defer></script>
 </body>
 </html>
