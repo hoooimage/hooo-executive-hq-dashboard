@@ -1,5 +1,5 @@
 const now = new Date();
-const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], settings:[], workstreams:[], tasksNew:[], decisionsNew:[], events:[], metrics:[], docs:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
+const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], settings:[], workstreams:[], tasksNew:[], decisionsNew:[], events:[], metrics:[], docs:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', taskWorkstream:'', taskStatus:'', taskDeadline:'all', calendarMode:'list', calendarMonth:new Date(now.getFullYear(),now.getMonth(),1), financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
 const LIVE_ENDPOINT = String(window.HOOO_DATA_ENDPOINT || '').trim();
 const WRITE_ENDPOINT = String(window.HOOO_WRITE_ENDPOINT || '').trim();
 
@@ -330,39 +330,25 @@ function renderProgress() {
 }
 
 function populateTaskFilters() {
-  const status=document.querySelector('#status-filter'), owner=document.querySelector('#owner-filter');
-  const statuses=[...new Set(state.tasks.map(x=>x['狀態']).filter(Boolean))], owners=[...new Set(state.tasks.map(x=>x['部門']).filter(Boolean))];
-  status.innerHTML='<option value="">所有狀態</option>'+statuses.map(x=>`<option>${esc(x)}</option>`).join('');
-  owner.innerHTML='<option value="">所有部門</option>'+owners.map(x=>`<option>${esc(x)}</option>`).join('');
-  populateGoalWorkFilters();
+  const workstream=document.querySelector('#task-workstream-filter'),status=document.querySelector('#task-status-filter');
+  workstream.innerHTML='<option value="">全部工作線</option>'+[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序'])).map(x=>`<option value="${esc(x.id)}">${esc(x.id)} · ${esc(x['名稱'])}</option>`).join('');
+  status.innerHTML='<option value="">全部狀態</option>'+['未開始','進行中','等待中','完成'].map(x=>`<option>${x}</option>`).join('');
+  workstream.value=state.taskWorkstream;status.value=state.taskStatus;document.querySelector('#task-deadline-filter').value=state.taskDeadline;
+  const workstreamOptions=[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序'])).map(x=>`<option value="${esc(x.id)}">${esc(x.id)} · ${esc(x['名稱'])}</option>`).join('');
+  document.querySelector('#task-form-workstream').innerHTML=workstreamOptions;document.querySelector('#decision-followup-workstream').innerHTML=workstreamOptions;
 }
 
-function filteredTasks() {
-  const q=document.querySelector('#task-search').value.trim().toLowerCase(), status=document.querySelector('#status-filter').value, owner=document.querySelector('#owner-filter').value;
-  return state.tasks.filter(t=>(!q||Object.values(t).join(' ').toLowerCase().includes(q))&&(!status||t['狀態']===status)&&(!owner||t['部門']===owner)&&(!state.project||t['專案／客戶']===state.project));
+function filteredNewTasks() {
+  const today=localDay(new Date()),monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);const monthEnd=new Date(today.getFullYear(),today.getMonth()+1,0);
+  return state.tasksNew.filter(task=>{const due=localDay(task['期限']);if(state.taskWorkstream&&task['工作線 id']!==state.taskWorkstream)return false;if(state.taskStatus&&task['狀態']!==state.taskStatus)return false;if(state.taskDeadline==='week'&&(!due||due<monday||due>sunday))return false;if(state.taskDeadline==='month'&&(!due||due<today||due>monthEnd))return false;if(state.taskDeadline==='overdue'&&(!due||due>=today||task['狀態']==='完成'))return false;return true;}).sort((a,b)=>{const ad=localDay(a['期限']),bd=localDay(b['期限']);return (ad?.getTime()||Infinity)-(bd?.getTime()||Infinity);});
 }
 
-function renderProjectTabs() {
-  const projects=[...new Set(state.tasks.map(x=>x['專案／客戶']||'未分類'))];
-  document.querySelector('#project-tabs').innerHTML=`<button class="chip ${!state.project?'active':''}" data-project="">全部專案</button>`+projects.map(p=>`<button class="chip ${state.project===p?'active':''}" data-project="${esc(p)}">${esc(p)}</button>`).join('');
+function renderTasks(){
+  const streams=[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序']));
+  document.querySelector('#task-workstreams').innerHTML=streams.map(stream=>{const rows=state.tasksNew.filter(task=>task['工作線 id']===stream.id),done=rows.filter(task=>task['狀態']==='完成').length,pct=rows.length?Math.round(done/rows.length*100):0;return `<button type="button" data-task-stream="${esc(stream.id)}" class="${state.taskWorkstream===stream.id?'active':''}"><header><span>${esc(stream.id)}</span><strong>${esc(stream['名稱'])}</strong><b>${pct}%</b></header><p>${esc(stream['3 月目標'])}</p><div><i style="width:${pct}%"></i></div><small>${done} / ${rows.length} 項完成</small></button>`;}).join('');
+  const rows=filteredNewTasks(),streamMap=Object.fromEntries(state.workstreams.map(s=>[s.id,s['名稱']])),today=localDay(new Date());document.querySelector('#task-count').textContent=`顯示 ${rows.length} 項，共 ${state.tasksNew.length} 項`;
+  document.querySelector('#task-list').innerHTML=rows.length?rows.map(task=>{const due=localDay(task['期限']),overdue=due&&due<today&&task['狀態']!=='完成';return `<article class="task-item ${overdue?'is-overdue':''}"><div class="task-item-main"><div class="task-item-meta"><span>${esc(task.id)}</span><b>${esc(task['工作線 id'])} · ${esc(streamMap[task['工作線 id']]||'')}</b>${overdue?'<em>已過期</em>':''}</div><h4>${esc(task['待辦'])}</h4><p>${esc(task['下一步']||'尚未填寫下一步')}</p>${task['來源文件']?`<a href="${esc(task['來源文件'])}" target="_blank" rel="noopener">來源文件 ↗</a>`:''}</div><div class="task-item-side"><label>狀態<select data-new-task-status="${esc(task.id)}" data-current-status="${esc(task['狀態'])}">${['未開始','進行中','等待中','完成'].map(status=>`<option ${task['狀態']===status?'selected':''}>${status}</option>`).join('')}</select></label><span>${esc(task['負責人']||'圈圈')}</span><time>${task['期限']?esc(task['期限']):'無固定期限'}</time></div></article>`;}).join(''):'<div class="overview-empty"><strong>沒有符合條件的待辦</strong><span>請調整篩選條件。</span></div>';
 }
-
-function renderGantt() {
-  const tasks=filteredTasks();
-  if(!tasks.length){ document.querySelector('#gantt-board').innerHTML='<p class="empty-state">沒有符合條件的任務。</p>'; return; }
-  const dates=tasks.flatMap(t=>[parseDate(t['開始日']),parseDate(t['期限'])]).filter(Boolean);
-  const min=dates.length?new Date(Math.min(...dates)):new Date(), max=dates.length?new Date(Math.max(...dates)):new Date(min.getTime()+14*86400000);
-  const total=Math.max((max-min)/86400000,1);
-  const groups=Object.groupBy?Object.groupBy(tasks,t=>t['專案／客戶']||'未分類'):tasks.reduce((a,t)=>((a[t['專案／客戶']||'未分類']??=[]).push(t),a),{});
-  document.querySelector('#gantt-board').innerHTML=Object.entries(groups).map(([project,rows])=>`<section class="gantt-project"><header><div><strong>${esc(project)}</strong><small>${rows.length} 個子任務</small></div><span>${rows.filter(x=>x['狀態']==='已完成').length}/${rows.length} 完成</span></header><div class="gantt-scale"><span>${dateLabel(min)}</span><span>${dateLabel(max)}</span></div>${rows.map(t=>{const s=parseDate(t['開始日'])||min,e=parseDate(t['期限'])||s;const left=Math.max(0,((s-min)/86400000)/total*100),width=Math.max(4,(((e-s)/86400000)+1)/total*100);return `<div class="gantt-row"><div class="gantt-label"><b>${esc(t['任務ID'])}</b><span>${esc(t['任務名稱'])}</span><small>${esc(t['負責人'])}</small></div><div class="gantt-track"><span class="${statusClass(t['狀態'])}" style="left:${left}%;width:${Math.min(width,100-left)}%"><em>${esc(t['狀態'])}</em></span></div></div>`;}).join('')}</section>`).join('');
-}
-
-function renderTaskTable() {
-  const tasks=filteredTasks(); document.querySelector('#task-count').textContent=`${tasks.length} 項`;
-  document.querySelector('#task-table').innerHTML=tasks.map(t=>`<tr><td><small>${esc(t['目標ID']||'未歸屬')} · ${esc(t['工作類別'])} · ${esc(t['任務ID'])}</small><strong>${esc(t['任務名稱'])}</strong></td><td>${esc(t['負責人'])}<small>${esc(t['部門'])}</small></td><td><span class="tag ${statusClass(t['狀態'])}">${esc(t['狀態'])}</span><small>進度 ${numeric(t['完成進度%'])}%</small></td><td>${esc(t['開始日'])}<small>至 ${esc(t['期限'])}</small></td><td>${esc(t['下一步'])}<small>${esc(t['依賴／阻礙'])}</small></td></tr>`).join('');
-  document.querySelector('#task-empty').hidden=tasks.length>0;
-}
-function renderTasks(){renderGoalTree();renderWorkBoard();renderProjectTabs();renderGantt();renderTaskTable();}
 
 function financeRows(rows) {
   const active=rows.filter(row=>!['取消','作廢'].includes(row['收款狀態']||row['付款狀態']));
@@ -471,6 +457,45 @@ function renderFunnels() {
   document.querySelector('#funnel-detail').innerHTML=`<header class="funnel-summary"><div><span>${esc(f['漏斗ID'])} · ${esc(f['類別'])}</span><h4>${esc(f['服務名稱'])}</h4><p>${esc(f['主要客群'])}</p></div><div><span class="tag ${statusClass(f['狀態'])}">${esc(f['狀態'])}</span><small>主責｜${esc(f['主責'])}</small></div></header><div class="funnel-flow">${stages.map((s,i)=>`<article><span>${s[0]}</span><h5>${s[1]}</h5><p>${esc(s[2])}</p><strong>${i<4?'30 天｜':''}${esc(s[3])}</strong></article>`).join('')}</div><div class="funnel-notes"><p><b>名單誘因</b>${esc(f['名單誘因'])}</p><p><b>備註</b>${esc(f['備註']||'無')}</p></div>`;
 }
 
+const eventTypes=['阿默陪跑','講座','拍攝','高球','家庭日','學習','人脈交流','其他工作','個人事務'];
+const eventTypeClass=type=>`event-type-${eventTypes.indexOf(type)+1}`;
+
+function renderDecisionsNew(){
+  const pending=state.decisionsNew.filter(item=>item['狀態']==='待決定').sort((a,b)=>(localDay(a['決定期限'])?.getTime()||Infinity)-(localDay(b['決定期限'])?.getTime()||Infinity));
+  const decided=state.decisionsNew.filter(item=>item['狀態']==='已決定').sort((a,b)=>(localDay(b['決定日'])?.getTime()||0)-(localDay(a['決定日'])?.getTime()||0));
+  document.querySelector('#pending-decision-count').textContent=`${pending.length} 項等待決定`;
+  document.querySelector('#pending-decision-list').innerHTML=pending.length?pending.map(item=>`<article class="pending-decision-item"><header><span>${esc(item.id)}</span><time>${item['決定期限']?`期限 ${esc(item['決定期限'])}`:'尚未排期限'}</time></header><h4>${esc(item['事項'])}</h4><div class="decision-options">${String(item['選項']||'待提出').split(/[、,]/).map(option=>`<span>${esc(option.trim())}</span>`).join('')}</div><p>需要 <strong>${esc(item['一起決定的人']||'圈圈')}</strong> 一起決定</p><button class="button primary" type="button" data-record-decision="${esc(item.id)}">記錄決定</button></article>`).join(''):'<div class="overview-empty"><strong>目前沒有待決定事項</strong></div>';
+  document.querySelector('#decided-history').innerHTML=decided.length?decided.map(item=>`<article><div><span>${esc(item.id)}</span><time>${esc(item['決定日']||'')}</time></div><div><h4>${esc(item['事項'])}</h4><p>${esc(item['最後決定'])}</p>${item['後續待辦 id']?`<small>後續待辦：${esc(item['後續待辦 id'])}</small>`:''}</div></article>`).join(''):'<p class="empty-state">還沒有已決定紀錄。</p>';
+}
+
+function dayAvailability(date,rows){
+  const isWeekday=date.getDay()>0&&date.getDay()<6;if(!isWeekday)return '';
+  if(rows.some(event=>event['類型']==='家庭日'||event['時段']==='全天'))return '';
+  const morning=rows.some(event=>event['時段']==='上午'),afternoon=rows.some(event=>event['時段']==='下午');
+  if(!rows.length||rows.every(event=>event['時段']==='晚上'))return '全天空檔';
+  if(morning&&!afternoon)return '下午空檔';if(afternoon&&!morning)return '上午空檔';return '';
+}
+
+function calendarDayCard(date,compact=false){
+  const key=localIso(date),rows=state.events.filter(event=>event['日期']===key),availability=dayAvailability(date,rows);
+  return `<article class="calendar-day-card ${availability?'has-vacancy':''} ${compact?'compact':''}"><header><div><span>${date.toLocaleDateString('zh-TW',{weekday:'short'})}</span><strong>${date.getMonth()+1}/${date.getDate()}</strong></div>${availability?`<button type="button" data-fill-vacancy="${key}" data-vacancy="${availability}">${availability} ＋</button>`:''}</header><div class="calendar-events">${rows.length?rows.map(event=>`<div class="calendar-event ${eventTypeClass(event['類型'])}"><span>${esc(event['時段'])}</span><strong>${esc(event['標題'])}</strong><small>${esc(event['地點']||event['類型'])}</small></div>`).join(''):'<p>尚無行程</p>'}</div></article>`;
+}
+
+function renderCalendar(){
+  document.querySelectorAll('[data-calendar-mode]').forEach(button=>button.classList.toggle('active',button.dataset.calendarMode===state.calendarMode));document.querySelector('#calendar-month-nav').hidden=state.calendarMode!=='month';
+  document.querySelector('#calendar-legend').innerHTML=eventTypes.map(type=>`<span class="${eventTypeClass(type)}"><i></i>${type}</span>`).join('');
+  const root=document.querySelector('#calendar-content');
+  if(state.calendarMode==='list'){const today=localDay(new Date());root.className='calendar-list';root.innerHTML=Array.from({length:14},(_,index)=>{const date=new Date(today);date.setDate(today.getDate()+index);return calendarDayCard(date);}).join('');return;}
+  const first=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth(),1),last=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth()+1,0),start=new Date(first);start.setDate(first.getDate()-first.getDay());const end=new Date(last);end.setDate(last.getDate()+(6-last.getDay()));document.querySelector('#calendar-month-label').textContent=first.toLocaleDateString('zh-TW',{year:'numeric',month:'long'});root.className='calendar-month';root.innerHTML='<div class="calendar-weekdays">'+['日','一','二','三','四','五','六'].map(x=>`<span>${x}</span>`).join('')+'</div><div class="calendar-month-grid">'+Array.from({length:Math.round((end-start)/86400000)+1},(_,index)=>{const date=new Date(start);date.setDate(start.getDate()+index);return `<div class="${date.getMonth()===first.getMonth()?'':'outside-month'}">${calendarDayCard(date,true)}</div>`;}).join('')+'</div>';
+}
+
+function openTaskDialog(){const form=document.querySelector('#task-form');form.reset();form.elements.owner.value='圈圈';form.elements.status.value='未開始';form.elements.workstreamId.value=state.taskWorkstream||state.workstreams[0]?.id||'';document.querySelector('#task-dialog').showModal();}
+function openDecisionDialog(item){const form=document.querySelector('#decision-form');form.reset();const record=Boolean(item);document.querySelector('#decision-dialog-title').textContent=record?'記錄決定':'新增待決定';form.elements.action.value=record?'decisionRecord':'decisionNew';form.elements.id.value=item?.id||'';form.elements.title.value=item?.['事項']||'';form.elements.options.value=item?.['選項']||'';form.elements.people.value=item?.['一起決定的人']||'';form.elements.due.value=item?.['決定期限']||'';form.elements.decisionDate.value=localIso(new Date());form.elements.finalDecision.required=record;document.querySelectorAll('.decision-record-only').forEach(el=>el.hidden=!record);document.querySelectorAll('.followup-fields').forEach(el=>el.hidden=true);document.querySelector('#decision-dialog').showModal();}
+function openEventDialog(date='',vacancy=''){const form=document.querySelector('#event-form');form.reset();form.elements.date.value=date||localIso(new Date());form.elements.period.value=vacancy.includes('上午')?'上午':vacancy.includes('下午')?'下午':'全天';form.elements.type.value='其他工作';if(vacancy)form.elements.title.placeholder=`這段${vacancy}要安排什麼？`;document.querySelector('#event-dialog').showModal();}
+
+function submitSimpleForm(event){event.preventDefault();const form=event.currentTarget,params=Object.fromEntries(new FormData(form).entries());if(postForm(params))form.closest('dialog').close();}
+function submitDecisionForm(event){event.preventDefault();const form=event.currentTarget,params=Object.fromEntries(new FormData(form).entries());params.createFollowup=form.elements.createFollowup.checked?'yes':'';if(postForm(params))form.closest('dialog').close();}
+
 function openAction(button) {
   const form=document.querySelector('#action-form');
   form.elements.action.value=button.dataset.type;
@@ -483,10 +508,10 @@ function openAction(button) {
 }
 
 function postForm(params) {
-  if(!WRITE_ENDPOINT) return showToast('尚未設定安全寫入端點',false);
+  if(!WRITE_ENDPOINT){showToast('寫入功能尚未完成 Google 授權，可先關閉視窗繼續查看',false);return false;}
   const form=document.createElement('form'); form.method='POST'; form.action=WRITE_ENDPOINT; form.target='write-target'; form.hidden=true;
   Object.entries(params).forEach(([k,v])=>{const input=document.createElement('input');input.name=k;input.value=v??'';form.append(input);});
-  document.body.append(form); form.submit(); form.remove(); showToast('正在送出到試算表…');
+  document.body.append(form); form.submit(); form.remove(); showToast('正在送出到試算表…');return true;
 }
 
 function submitAction(event) {
@@ -548,7 +573,7 @@ function applyData(data,source){
   document.querySelectorAll('[data-sheet-link]').forEach(a=>a.href=data.sourceUrl||'https://docs.google.com/spreadsheets/d/1omzCYbgnZ7uSJWlIjvbAaVBfv0no-GJzkLeInVKEx_c/edit');
   const stamp=new Date(data.generatedAt||Date.now()).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
   document.querySelector('#sync-time').textContent=`${source==='live'?'即時同步':'備援快照'}：${stamp}`; setSync(source==='live'?'live':'fallback',source==='live'?'已連線試算表':'使用備援快照');
-  renderOverview();renderGoals();renderKpis();renderInbox();renderWorkOverview();renderDaily();populateTaskFilters();renderTasks();renderRevenue();renderGovernance();renderExecutives();
+  renderOverview();renderGoals();renderKpis();renderInbox();renderWorkOverview();renderDaily();populateTaskFilters();renderTasks();renderDecisionsNew();renderCalendar();renderRevenue();renderExecutives();
 }
 
 async function syncData(){
@@ -564,32 +589,43 @@ document.addEventListener('click',event=>{
   const nav=event.target.closest('[data-view]'); if(nav)showView(nav.dataset.view);
   const jump=event.target.closest('[data-jump]'); if(jump)showView(jump.dataset.jump);
   const overviewAdd=event.target.closest('#overview-add-item');if(overviewAdd)openInbox();
-  const stream=event.target.closest('[data-workstream]');if(stream){state.workCategory=stream.dataset.workstream;showView('tasks');}
-  const project=event.target.closest('[data-project]'); if(project){state.project=project.dataset.project;renderTasks();}
+  const stream=event.target.closest('[data-workstream]');if(stream){state.taskWorkstream=stream.dataset.workstream;populateTaskFilters();renderTasks();showView('tasks');}
+  const taskStream=event.target.closest('[data-task-stream]');if(taskStream){state.taskWorkstream=state.taskWorkstream===taskStream.dataset.taskStream?'':taskStream.dataset.taskStream;populateTaskFilters();renderTasks();}
   const cat=event.target.closest('[data-service-category]'); if(cat){state.serviceCategory=cat.dataset.serviceCategory;renderRevenue();}
   const funnel=event.target.closest('[data-funnel-service]'); if(funnel){state.funnelService=funnel.dataset.funnelService;renderFunnels();}
   const level=event.target.closest('[data-goal-level]'); if(level){state.goalLevel=level.dataset.goalLevel;renderGoalTree();}
   const mode=event.target.closest('[data-finance-mode]'); if(mode){state.financeMode=mode.dataset.financeMode;renderRevenue();}
   const editCategory=event.target.closest('[data-edit-cost-category]');if(editCategory)openCostCategory(editCategory);
   const action=event.target.closest('[data-action-open]'); if(action)openAction(action);
+  const recordDecision=event.target.closest('[data-record-decision]');if(recordDecision)openDecisionDialog(state.decisionsNew.find(item=>item.id===recordDecision.dataset.recordDecision));
+  const vacancy=event.target.closest('[data-fill-vacancy]');if(vacancy)openEventDialog(vacancy.dataset.fillVacancy,vacancy.dataset.vacancy);
+  const calendarMode=event.target.closest('[data-calendar-mode]');if(calendarMode){state.calendarMode=calendarMode.dataset.calendarMode;renderCalendar();}
+  const calendarShift=event.target.closest('[data-calendar-shift]');if(calendarShift){state.calendarMonth=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth()+Number(calendarShift.dataset.calendarShift),1);renderCalendar();}
+  const floating=event.target.closest('#floating-add');if(floating){const menu=document.querySelector('#quick-add-menu');menu.hidden=!menu.hidden;return;}
+  const quick=event.target.closest('[data-quick-add]');if(quick){document.querySelector('#quick-add-menu').hidden=true;({task:openTaskDialog,decision:()=>openDecisionDialog(null),event:()=>openEventDialog(),income:()=>document.querySelector('#add-income').click(),expense:()=>document.querySelector('#add-expense').click()})[quick.dataset.quickAdd]?.();}
 });
-['task-search','status-filter','owner-filter'].forEach(id=>document.querySelector('#'+id).addEventListener(id==='task-search'?'input':'change',renderTasks));
-document.querySelector('#goal-filter').addEventListener('change',event=>{state.workGoal=event.target.value;renderWorkBoard();});
-document.querySelector('#category-filter').addEventListener('change',event=>{state.workCategory=event.target.value;renderWorkBoard();});
-document.querySelector('#history-project').addEventListener('change',renderHistory);
+document.querySelector('#task-workstream-filter').addEventListener('change',event=>{state.taskWorkstream=event.target.value;renderTasks();});
+document.querySelector('#task-status-filter').addEventListener('change',event=>{state.taskStatus=event.target.value;renderTasks();});
+document.querySelector('#task-deadline-filter').addEventListener('change',event=>{state.taskDeadline=event.target.value;renderTasks();});
+document.querySelector('#clear-task-filters').addEventListener('click',()=>{state.taskWorkstream='';state.taskStatus='';state.taskDeadline='all';populateTaskFilters();renderTasks();});
 document.querySelector('#sync-now').addEventListener('click',syncData);
 document.querySelector('#finance-year').addEventListener('change',event=>{state.financeYear=Number(event.target.value);renderRevenue();});
 document.querySelector('#finance-month').addEventListener('change',event=>{state.financeMonth=Number(event.target.value);renderRevenue();});
 document.querySelector('#add-income').addEventListener('click',()=>{const form=document.querySelector('#income-form');form.reset();form.elements.date.value=new Date().toISOString().slice(0,10);document.querySelector('#income-dialog').showModal();});
 document.querySelector('#add-expense').addEventListener('click',()=>{const form=document.querySelector('#expense-form');form.reset();form.elements.date.value=new Date().toISOString().slice(0,10);renderExpenseCategoryOptions();document.querySelector('#expense-dialog').showModal();});
 document.querySelector('#add-cost-category').addEventListener('click',()=>openCostCategory(null));
-['add-inbox-item','add-inbox-item-small','add-inbox-item-tasks'].forEach(id=>document.querySelector('#'+id).addEventListener('click',openInbox));
+['add-inbox-item','add-inbox-item-small'].forEach(id=>document.querySelector('#'+id).addEventListener('click',openInbox));
+document.querySelector('#add-task').addEventListener('click',openTaskDialog);document.querySelector('#add-decision').addEventListener('click',()=>openDecisionDialog(null));document.querySelector('#add-event').addEventListener('click',()=>openEventDialog());
 document.querySelector('#expense-cost-type').addEventListener('change',renderExpenseCategoryOptions);
 document.querySelector('#action-form').addEventListener('submit',submitAction);
 document.querySelector('#income-form').addEventListener('submit',submitIncome);
 document.querySelector('#expense-form').addEventListener('submit',submitExpense);
 document.querySelector('#cost-category-form').addEventListener('submit',submitCostCategory);
 document.querySelector('#inbox-form').addEventListener('submit',submitInbox);
+document.querySelector('#task-form').addEventListener('submit',submitSimpleForm);document.querySelector('#decision-form').addEventListener('submit',submitDecisionForm);document.querySelector('#event-form').addEventListener('submit',submitSimpleForm);
+document.querySelector('#decision-form').elements.createFollowup.addEventListener('change',event=>document.querySelectorAll('.followup-fields').forEach(el=>el.hidden=!event.target.checked));
+document.querySelector('#event-type').innerHTML=eventTypes.map(type=>`<option>${type}</option>`).join('');
+document.addEventListener('change',event=>{const select=event.target.closest('[data-new-task-status]');if(!select)return;const old=select.dataset.currentStatus,newStatus=select.value;if(!WRITE_ENDPOINT){select.value=old;showToast('網站寫入尚未啟用，請先到 Google Sheet 更新',false);return;}postForm({action:'taskNewStatus',id:select.dataset.newTaskStatus,status:newStatus});select.dataset.currentStatus=newStatus;});
 function bindAmountCalculator(formId,paidName) {
   const form=document.querySelector(formId),recalculate=()=>{const qty=numeric(form.elements.quantity.value),price=numeric(form.elements.unitPrice.value);if(qty&&price)form.elements.amountDue.value=qty*price;};
   form.elements.quantity.addEventListener('input',recalculate);form.elements.unitPrice.addEventListener('input',recalculate);

@@ -1,4 +1,5 @@
 const SPREADSHEET_ID = '1omzCYbgnZ7uSJWlIjvbAaVBfv0no-GJzkLeInVKEx_c';
+const WRITE_ACCOUNTS = ['hoooimage@gmail.com', 'viannieho@gmail.com'];
 
 // 公開讀取僅輸出 Dashboard 必要欄位；原始試算表仍維持限制存取。
 const PUBLIC_RANGES = {
@@ -60,6 +61,8 @@ function doPost(e) {
   const p = (e && e.parameter) || {};
   let result;
   try {
+    const email = String(Session.getActiveUser().getEmail() || '').toLowerCase();
+    if (WRITE_ACCOUNTS.indexOf(email) < 0) throw new Error('這個 Google 帳號沒有寫入權限');
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
@@ -77,6 +80,53 @@ function doPost(e) {
 
 function applyAction_(p) {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  if (p.action === 'taskNew') {
+    const id = appendNewTask_(spreadsheet, {
+      title: p.title, workstreamId: p.workstreamId, owner: p.owner, due: p.due,
+      status: p.status, next: p.next, source: p.source
+    });
+    return { ok: true, message: id + ' 已新增到待辦' };
+  }
+  if (p.action === 'taskNewStatus') {
+    const status = String(p.status || '');
+    if (['未開始', '進行中', '等待中', '完成'].indexOf(status) < 0) throw new Error('不允許的待辦狀態');
+    const sheet = spreadsheet.getSheetByName('Tasks');
+    const row = findIdRow_(sheet, String(p.id || ''), 1, 5);
+    sheet.getRange(row, 6).setValue(status);
+    sheet.getRange(row, 10).setValue(status === '完成' ? Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd') : '');
+    return { ok: true, message: String(p.id || '') + ' 狀態已更新' };
+  }
+  if (p.action === 'decisionNew') {
+    const title = String(p.title || '').trim();
+    if (!title) throw new Error('請輸入待決定事項');
+    const sheet = spreadsheet.getSheetByName('Decisions');
+    const row = Math.max(sheet.getLastRow() + 1, 5);
+    const id = nextId_(sheet, 'D-', 1, 5);
+    sheet.getRange(row, 1, 1, 9).setValues([[id, title, String(p.options || ''), String(p.people || ''), cleanDate_(p.due), '待決定', '', '', '']]);
+    return { ok: true, message: id + ' 已新增到待決定' };
+  }
+  if (p.action === 'decisionRecord') {
+    const finalDecision = String(p.finalDecision || '').trim();
+    if (!finalDecision) throw new Error('請填寫最後決定');
+    const sheet = spreadsheet.getSheetByName('Decisions');
+    const row = findIdRow_(sheet, String(p.id || ''), 1, 5);
+    let followupId = '';
+    if (String(p.createFollowup || '') === 'yes') {
+      followupId = appendNewTask_(spreadsheet, { title: p.followupTitle || ('承接決定：' + String(p.title || '')), workstreamId: p.followupWorkstream, owner: '圈圈', due: p.followupDue, status: '未開始', next: '', source: String(p.id || '') });
+    }
+    sheet.getRange(row, 6, 1, 4).setValues([['已決定', finalDecision, cleanDate_(p.decisionDate) || Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd'), followupId]]);
+    return { ok: true, message: String(p.id || '') + ' 已記錄決定' + (followupId ? '，並建立 ' + followupId : '') };
+  }
+  if (p.action === 'eventNew') {
+    const date = cleanDate_(p.date), title = String(p.title || '').trim(), period = String(p.period || '全天'), type = String(p.type || '其他工作');
+    if (!date || !title) throw new Error('請填寫行程日期與標題');
+    if (['全天', '上午', '下午', '晚上'].indexOf(period) < 0) throw new Error('不允許的行程時段');
+    const types = ['阿默陪跑','講座','拍攝','高球','家庭日','學習','人脈交流','其他工作','個人事務'];
+    if (types.indexOf(type) < 0) throw new Error('不允許的行程類型');
+    const sheet = spreadsheet.getSheetByName('Events'), row = Math.max(sheet.getLastRow() + 1, 5), id = nextId_(sheet, 'EV-', 1, 5);
+    sheet.getRange(row, 1, 1, 7).setValues([[id, date, period, type, title, String(p.location || ''), String(p.note || '')]]);
+    return { ok: true, message: id + ' 已新增到行事曆' };
+  }
   if (p.action === 'decision') {
     const status = String(p.status || '');
     if (!['已生效', '需調整', '待CEO確認'].includes(status)) throw new Error('不允許的決策狀態');
@@ -162,6 +212,30 @@ function applyAction_(p) {
     return { ok: true, message: id + ' 費用類別已儲存' };
   }
   throw new Error('未知的操作');
+}
+
+function appendNewTask_(spreadsheet, data) {
+  const title = String(data.title || '').trim(), workstreamId = String(data.workstreamId || '').trim(), status = String(data.status || '未開始');
+  if (!title || !workstreamId) throw new Error('請填寫待辦與工作線');
+  if (['未開始', '進行中', '等待中', '完成'].indexOf(status) < 0) throw new Error('不允許的待辦狀態');
+  const sheet = spreadsheet.getSheetByName('Tasks'), row = Math.max(sheet.getLastRow() + 1, 5), id = nextId_(sheet, 'T-', 1, 5), today = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd');
+  sheet.getRange(row, 1, 1, 10).setValues([[id, title, workstreamId, String(data.owner || '圈圈'), cleanDate_(data.due), status, String(data.next || ''), String(data.source || ''), today, status === '完成' ? today : '']]);
+  return id;
+}
+
+function nextId_(sheet, prefix, column, startRow) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < startRow) return prefix + '001';
+  const values = sheet.getRange(startRow, column, lastRow - startRow + 1, 1).getDisplayValues();
+  const max = values.reduce((current, row) => Math.max(current, Number(String(row[0] || '').replace(/\D/g, '')) || 0), 0);
+  return prefix + Utilities.formatString('%03d', max + 1);
+}
+
+function cleanDate_(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) throw new Error('日期必須是 YYYY-MM-DD');
+  return text;
 }
 
 function findIdRow_(sheet, id, column, startRow) {

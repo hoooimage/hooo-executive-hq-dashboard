@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#bf2f70">
   <meta name="description" content="HOOO 好圈圈作戰儀表板｜準備期進度、待辦、待決定、行程、成效數字與收支。">
   <title>HOOO AI Executive HQ</title>
-  <link rel="stylesheet" href="./assets/styles.css?v=20261119-1">
+  <link rel="stylesheet" href="./assets/styles.css?v=20261119-2">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要內容</a>
@@ -81,44 +81,40 @@
 
       <section class="view" data-view-panel="tasks">
         <div class="intro-row">
-          <div><p class="eyebrow">GOAL TO ACTION</p><h2>每一件事，都要知道為什麼做。</h2></div>
-          <div class="ledger-actions"><button class="button primary" id="add-inbox-item-tasks">＋ 新增事項</button></div>
+          <div><p class="eyebrow">PREPARATION TASKS</p><h2>把 3 月前要完成的事，一件一件推進。</h2></div>
+          <div class="ledger-actions"><button class="button primary" id="add-task">＋ 新增待辦</button></div>
         </div>
-        <section class="panel goal-map-panel">
-          <div class="section-head"><div><p class="eyebrow">GOAL TREE</p><h3>北極星 → 年度 → 90天 → 30天</h3></div><div id="goal-level-tabs" class="project-tabs goal-level-tabs"></div></div>
-          <div id="goal-tree" class="goal-tree"></div>
+        <section class="workstream-summary">
+          <div class="section-head"><div><p class="eyebrow">FIVE WORKSTREAMS</p><h3>五條工作線進度</h3></div><span class="section-note">完成待辦 ÷ 全部待辦</span></div>
+          <div id="task-workstreams" class="task-workstreams"></div>
         </section>
-        <section class="panel work-board-panel">
+        <section class="panel task-list-panel">
           <div class="section-head task-head">
-            <div><p class="eyebrow">ALL COMPANY WORK</p><h3>全公司工作板</h3></div>
-            <div class="filters"><select id="goal-filter"><option value="">所有目標</option></select><select id="category-filter"><option value="">所有類別</option></select></div>
-          </div>
-          <div id="work-board" class="work-board"></div>
-        </section>
-        <section class="panel">
-          <div class="section-head task-head">
-            <div><p class="eyebrow">TIMELINE</p><h3>專案與任務時程</h3></div>
+            <div><p class="eyebrow">TASK LIST</p><h3>待辦清單</h3></div>
             <div class="filters">
-              <input id="task-search" type="search" placeholder="搜尋專案、任務或負責人">
-              <select id="status-filter"><option value="">所有狀態</option></select>
-              <select id="owner-filter"><option value="">所有部門</option></select>
+              <select id="task-workstream-filter"><option value="">全部工作線</option></select>
+              <select id="task-status-filter"><option value="">全部狀態</option></select>
+              <select id="task-deadline-filter"><option value="all">全部期限</option><option value="week">本週</option><option value="month">本月</option><option value="overdue">已過期</option></select>
             </div>
           </div>
-          <div id="project-tabs" class="project-tabs"></div>
-          <div id="gantt-board" class="gantt-board"></div>
-        </section>
-        <section class="panel list-panel">
-          <div class="section-head"><div><p class="eyebrow">TASK DETAILS</p><h3>任務明細</h3></div><span id="task-count" class="section-note"></span></div>
-          <div class="table-wrap"><table><thead><tr><th>專案／任務</th><th>負責</th><th>狀態</th><th>期間</th><th>下一步</th></tr></thead><tbody id="task-table"></tbody></table></div>
-          <p id="task-empty" class="empty-state" hidden>沒有符合條件的任務。</p>
+          <div class="task-result-head"><span id="task-count"></span><button class="text-button" id="clear-task-filters">清除篩選</button></div>
+          <div id="task-list" class="task-list"></div>
         </section>
       </section>
 
-      <section class="view phase-placeholder-view" data-view-panel="calendar">
-        <div class="phase-placeholder">
-          <span>第 3 階段</span><h2>行事曆</h2><p>未來 14 天、月曆切換與空檔指定功能會在下一階段完成；總覽已先顯示未來 7 天。</p>
-          <button class="button primary" data-jump="overview">回總覽看近期行程</button>
+      <section class="view" data-view-panel="calendar">
+        <div class="intro-row">
+          <div><p class="eyebrow">TIME & CAPACITY</p><h2>行程排好，也要看得見可以工作的空檔。</h2></div>
+          <div class="ledger-actions"><button class="button primary" id="add-event">＋ 新增行程</button></div>
         </div>
+        <section class="panel calendar-panel">
+          <div class="calendar-toolbar">
+            <div class="period-switch"><button class="chip active" data-calendar-mode="list">未來 14 天</button><button class="chip" data-calendar-mode="month">月曆</button></div>
+            <div class="calendar-month-nav" id="calendar-month-nav" hidden><button class="small-button" data-calendar-shift="-1">←</button><strong id="calendar-month-label"></strong><button class="small-button" data-calendar-shift="1">→</button></div>
+          </div>
+          <div id="calendar-legend" class="calendar-legend"></div>
+          <div id="calendar-content"></div>
+        </section>
       </section>
 
       <section class="view phase-placeholder-view" data-view-panel="metrics">
@@ -181,30 +177,18 @@
       </section>
 
       <section class="view" data-view-panel="decisions">
-        <div class="phase-placeholder compact-placeholder">
-          <span>第 3 階段</span><h2>待決定</h2><p>記錄決定、建立後續待辦與已決定紀錄會在下一階段完成；總覽已先列出最接近期限的 3 項。</p>
-          <button class="button primary" data-jump="overview">回總覽看待決定</button>
-        </div>
-        <div hidden>
         <div class="intro-row">
-          <div><p class="eyebrow">DECISIONS & HISTORY</p><h2>從討論、決策到任務，都看得到承接。</h2></div>
-          <p>每次對話與會議都保留摘要、決策 ID、任務 ID、目前狀態與下一步。</p>
+          <div><p class="eyebrow">NEED YOUR CALL</p><h2>把該決定的事說清楚，決定後立刻承接。</h2></div>
+          <div class="ledger-actions"><button class="button primary" id="add-decision">＋ 新增待決定</button></div>
         </div>
-        <div class="two-column governance-grid">
-          <section class="panel">
-            <div class="section-head"><div><p class="eyebrow">DECISIONS</p><h3>共同決策</h3></div></div>
-            <div id="decision-list" class="decision-list"></div>
-          </section>
-          <section class="panel">
-            <div class="section-head"><div><p class="eyebrow">MEETINGS</p><h3>會議與討論</h3></div></div>
-            <div id="meeting-list" class="meeting-list"></div>
-          </section>
-        </div>
-        <section class="panel history-panel">
-          <div class="section-head"><div><p class="eyebrow">DISCUSSION PROGRESS</p><h3>所有討論的最新承接</h3></div><select id="history-project"><option value="">所有專案</option></select></div>
-          <div id="history-list" class="history-list"></div>
+        <section class="panel pending-decision-panel">
+          <div class="section-head"><div><p class="eyebrow">PENDING</p><h3>待決定事項</h3></div><span id="pending-decision-count" class="section-note"></span></div>
+          <div id="pending-decision-list" class="pending-decision-list"></div>
         </section>
-        </div>
+        <section class="panel decided-history-panel">
+          <div class="section-head"><div><p class="eyebrow">DECIDED</p><h3>已決定紀錄</h3></div><span class="section-note">新到舊</span></div>
+          <div id="decided-history" class="decided-history"></div>
+        </section>
       </section>
 
       <section class="view" data-view-panel="executives" hidden aria-hidden="true">
@@ -252,7 +236,35 @@
     <div class="mobile-more-menu" id="mobile-more-menu" hidden>
       <button data-view="metrics">數字成效</button><button data-view="finance">收支</button><button data-view="docs">文件</button>
     </div>
+    <button class="floating-add" id="floating-add" type="button" aria-label="快速新增">＋</button>
+    <div class="quick-add-menu" id="quick-add-menu" hidden><button data-quick-add="task">新增待辦</button><button data-quick-add="decision">新增待決定</button><button data-quick-add="event">新增行程</button><button data-quick-add="income">新增收入</button><button data-quick-add="expense">新增支出</button></div>
   </div>
+
+  <dialog id="task-dialog">
+    <form id="task-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">TASK</p><h3>新增待辦</h3>
+      <input type="hidden" name="action" value="taskNew">
+      <div class="form-grid"><label class="span-2">待辦<input name="title" required></label><label>工作線<select name="workstreamId" id="task-form-workstream" required></select></label><label>負責人<input name="owner" value="圈圈"></label><label>期限<input name="due" type="date"></label><label>狀態<select name="status"><option>未開始</option><option>進行中</option><option>等待中</option><option>完成</option></select></label><label class="span-2">下一步<input name="next"></label><label class="span-2">來源文件<input name="source"></label></div>
+      <p class="auth-note">儲存後寫入 Google Sheet 的 Tasks 工作表。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存待辦</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="decision-dialog">
+    <form id="decision-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">DECISION</p><h3 id="decision-dialog-title">記錄決定</h3>
+      <input type="hidden" name="action" value="decisionNew"><input type="hidden" name="id">
+      <div class="form-grid"><label class="span-2">事項<input name="title" required></label><label class="span-2">選項<input name="options" placeholder="多個選項可用、分開"></label><label>一起決定的人<input name="people"></label><label>決定期限<input name="due" type="date"></label><label class="span-2 decision-record-only">最後決定<textarea name="finalDecision" rows="3"></textarea></label><label class="decision-record-only">決定日<input name="decisionDate" type="date"></label><label class="check-label decision-record-only"><input name="createFollowup" type="checkbox" value="yes">自動建立後續待辦</label><label class="span-2 decision-record-only followup-fields">後續待辦內容<input name="followupTitle"></label><label class="decision-record-only followup-fields">工作線<select name="followupWorkstream" id="decision-followup-workstream"></select></label><label class="decision-record-only followup-fields">期限<input name="followupDue" type="date"></label></div>
+      <p class="auth-note">決定後會寫入 Decisions；勾選後續待辦時，也會一起寫入 Tasks。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="event-dialog">
+    <form id="event-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">EVENT</p><h3>新增行程</h3><input type="hidden" name="action" value="eventNew">
+      <div class="form-grid"><label>日期<input name="date" type="date" required></label><label>時段<select name="period"><option>全天</option><option>上午</option><option>下午</option><option>晚上</option></select></label><label>類型<select name="type" id="event-type"></select></label><label>標題<input name="title" required></label><label class="span-2">地點<input name="location"></label><label class="span-2">備註<textarea name="note" rows="3"></textarea></label></div>
+      <p class="auth-note">空檔指定用途後，會變成一筆正式行程。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存行程</button></div>
+    </form>
+  </dialog>
 
   <dialog id="action-dialog">
     <form id="action-form">
@@ -355,6 +367,6 @@
   <iframe id="write-target" name="write-target" hidden></iframe>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./assets/config.js"></script>
-  <script src="./assets/app.js?v=20261119-1" defer></script>
+  <script src="./assets/app.js?v=20261119-2" defer></script>
 </body>
 </html>
