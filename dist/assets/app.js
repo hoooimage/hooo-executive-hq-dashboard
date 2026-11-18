@@ -1,5 +1,5 @@
 const now = new Date();
-const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
+const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], settings:[], workstreams:[], tasksNew:[], decisionsNew:[], events:[], metrics:[], docs:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
 const LIVE_ENDPOINT = String(window.HOOO_DATA_ENDPOINT || '').trim();
 const WRITE_ENDPOINT = String(window.HOOO_WRITE_ENDPOINT || '').trim();
 
@@ -89,6 +89,59 @@ const operatingMapSeed = [
   ['S-008','M-002','30天目標','LINE經營','建立LINE歡迎、標籤、分眾與三段跟進','新好友能被分類並導向正確服務','新增、標籤率、回覆率、預約','待盤點','流程1套；標籤1份；跟進3則','2026-12-17','Sophie',5,'待處理','P0','LINE權限與好友數','LINE管關係，不重複CRM成交狀態']
 ];
 
+const settingsSeed = [
+  ['key','value'],['倒數目標日','2027-03-01'],['月營收目標','250000'],['目標生效月','2027-03'],['阿默合約結束日','2027-03-31']
+];
+const workstreamsSeed = [
+  ['id','名稱','說明','3 月目標','排序'],
+  ['W1','課程與交付物','','小團班開班',1],
+  ['W2','阿默模組化','','款待教材完成、提案新企業',2],
+  ['W3','兩場講座','','業務講座與 KOL 講座都試辦過，定期舉辦',3],
+  ['W4','網站與系統','','官網改版、報名頁與 LINE 自動化上線',4],
+  ['W5','內容與素材','','穩定發文、累積見證',5]
+];
+const tasksNewSeed = [
+  ['id','待辦','工作線 id','負責人','期限','狀態','下一步','來源文件','建立日','完成日'],
+  ['T-030','第一次拍攝：官網形象照、現場照、短影音','W5','圈圈','2026-11-23','未開始','','','2026-11-18',''],
+  ['T-031','IG、FB 簡介改為「讓每個圈子，都記得你的好」','W5','圈圈','2026-11-30','未開始','','','2026-11-18',''],
+  ['T-032','課程頁年資改為「15 年以上」','W4','圈圈','2026-11-30','未開始','','','2026-11-18',''],
+  ['T-033','在 iDealFlow 架設講座報名頁','W4','圈圈','2026-12-02','未開始','','','2026-11-18',''],
+  ['T-034','設定 LINE 自動訊息','W4','圈圈','2026-12-02','未開始','','','2026-11-18',''],
+  ['T-035','向 iDealFlow 確認部落格、SEO、GA4 支援','W4','圈圈','2026-12-02','未開始','','','2026-11-18',''],
+  ['T-036','更新「網站建置指令」：KOL 講座線上、新增業務講座','W4','圈圈','2026-12-02','未開始','','','2026-11-18',''],
+  ['T-037','更新業務講座提案檔為新版流程','W3','圈圈','2026-12-01','未開始','','','2026-11-18',''],
+  ['T-038','製作「下一場重要會面形象行動卡」','W3','圈圈','','未開始','待業務講座日期確定後，於講座前完成','','2026-11-18',''],
+  ['T-039','聯繫代表案例客戶，取得見證與授權','W5','圈圈','2026-12-15','未開始','','','2026-11-18',''],
+  ['T-040','製作「重要場合形象檢查清單」（LINE 加好友禮）','W5','圈圈','2026-12-16','未開始','','','2026-11-18',''],
+  ['T-041','第二次拍攝','W5','圈圈','2026-12-16','未開始','','','2026-11-18',''],
+  ['T-042','排程 12/25–1/2 旅行期間貼文','W5','圈圈','2026-12-24','未開始','','','2026-11-18',''],
+  ['T-043','每次阿默陪跑後 20 分鐘紀錄','W2','圈圈','','未開始','每次阿默陪跑結束當日預留 20 分鐘完成紀錄','','2026-11-18',''],
+  ['T-044','阿默款待教材初稿','W2','圈圈','2027-02-15','未開始','','','2026-11-18',''],
+  ['T-045','小團班課程大綱與交付物','W1','圈圈','2027-02-15','未開始','','','2026-11-18','']
+];
+const decisionsNewSeed = [
+  ['id','事項','選項','一起決定的人','決定期限','狀態','最後決定','決定日','後續待辦 id'],
+  ['D-015','2027年3月起月營收目標','NT$200,000／NT$250,000','圈圈','2026-11-18','已決定','2027年3月起月營收目標為 NT$250,000','2026-11-18',''],
+  ['D-016','業務講座日期','12/7、12/9、12/14、1 月','通訊處主管','2026-11-30','待決定','','',''],
+  ['D-017','通訊處團購價','金額與人數門檻','Jeffery','','待決定','','',''],
+  ['D-018','KOL 講座日期','1 月中平日晚上、過年後','iDealFlow','2026-12-15','待決定','','',''],
+  ['D-019','建站服務收費方式','待提出','圈圈','2027-01-15','待決定','','',''],
+  ['D-020','iDealFlow 合作分潤條件','待提出','iDealFlow','2027-01-15','待決定','','',''],
+  ['D-021','阿默合約結束後的續約方案','續約、維護方案、結束','阿默蛋糕','2027-01-31','待決定','','','']
+];
+const eventsSeed = [['id','日期','時段','類型','標題','地點','備註']];
+let eventSeedNumber=1;
+const addEventSeed=(date,period,type,title,location='',note='')=>eventsSeed.push([`EV-${String(eventSeedNumber++).padStart(3,'0')}`,date,period,type,title,location,note]);
+[['2026-11-19','全天'],['2026-11-20','全天'],['2026-11-26','全天'],['2026-11-27','全天'],['2026-12-01','全天'],['2026-12-02','上午'],['2026-12-03','全天'],['2026-12-04','全天'],['2026-12-10','全天'],['2026-12-11','全天'],['2026-12-16','上午'],['2026-12-17','全天'],['2026-12-18','全天'],['2026-12-22','全天'],['2026-12-23','全天']].forEach(([date,period])=>addEventSeed(date,period,'阿默陪跑','阿默陪跑'));
+addEventSeed('2026-11-25','下午','高球','初階團班與教練課');addEventSeed('2026-11-29','全天','高球','下場','龍潭');addEventSeed('2026-11-30','下午','高球','甜甜圈新手體驗','','14:00–17:00');addEventSeed('2026-12-08','全天','高球','下場團');addEventSeed('2026-12-13','全天','高球','下場','新竹');
+['2026-11-21','2026-11-24','2026-11-28','2026-12-05','2026-12-06','2026-12-12','2026-12-19','2026-12-20','2026-12-21'].forEach(date=>addEventSeed(date,'全天','家庭日','家庭日'));
+for(let t=Date.parse('2026-12-25T00:00:00Z');t<=Date.parse('2027-01-02T00:00:00Z');t+=86400000)addEventSeed(new Date(t).toISOString().slice(0,10),'全天','家庭日','泰國家庭旅行','泰國');
+addEventSeed('2026-11-22','下午','學習','財商課');addEventSeed('2026-11-22','上午','人脈交流','人脈交流');addEventSeed('2026-11-25','晚上','人脈交流','人脈交流');addEventSeed('2026-12-15','全天','其他工作','Lumina 助教');addEventSeed('2026-11-23','上午','個人事務','銀行開戶');addEventSeed('2026-12-16','晚上','個人事務','弄頭髮');
+const metricsSeed = [['日期','IG 粉絲','FB 粉絲','LINE 好友','講座報名','見證數','發文數','短影音數','備註'],['2026-11-18',479,598,127,0,0,'','','2026-11-18 基準值']];
+const docsSeed = [
+  ['名稱','用途','連結','最後更新日'],['品牌定位','品牌故事、核心價值、客群','https://claude.ai/artifact/RZxRkREajmHfTtJ1NL8wKb',''],['網站優化建議','官網診斷與改版方向','https://claude.ai/artifact/9CuBL8TRgtwNfd3E6tF3jR',''],['網站建置指令','給 iDealFlow AI 執行','https://claude.ai/artifact/KLKKxfkWCFomgY95JGAbY7',''],['講座宣傳與內容規劃','貼文主題與短影音腳本','https://claude.ai/artifact/7DE1KuZudbcXkwV3377X7o',''],['準備期計畫','路線圖、兩場講座大綱','https://claude.ai/artifact/BcnhG1xuysy96YiTaxDiCF',''],['儀表板改版說明','本文件','https://claude.ai/artifact/8VE3QjVsp9CMHS1pNeK2zM','2026-11-18']
+];
+
 const brandFoundationSeed = [
   ['編號','類型','正式文字','使用方式','狀態','確認日期'],
   ['BF-001','核心觀點','形象，不只是你看起來如何，而是別人如何理解你。','所有服務與內容的共同觀點','已確認','2026-11-17'],
@@ -149,12 +202,46 @@ const parseDate = value => {
 const dateLabel = value => {
   const d=parseDate(value); return d ? d.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'}) : (value || '未定');
 };
+const localIso = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const localDay = value => { const d=parseDate(value); return d ? new Date(d.getFullYear(),d.getMonth(),d.getDate()) : null; };
+const settingValue = key => state.settings.find(item=>item.key===key)?.value || '';
+
+function renderOverview() {
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const target=localDay(settingValue('倒數目標日')||'2027-03-01');
+  const days=Math.max(0,Math.ceil((target-today)/86400000));
+  document.querySelector('#overview-countdown').innerHTML=`<div><p>PREPARATION PERIOD</p><span>距離 3 月穩定接案</span><h2>還有 <strong>${days}</strong> 天</h2><small>目標日 ${target.toLocaleDateString('zh-TW',{year:'numeric',month:'numeric',day:'numeric'})} · 先把課程、講座、網站與內容準備好</small></div><button class="overview-add" id="overview-add-item" type="button">＋ 新增今日事項</button>`;
+
+  const metricRows=[...state.metrics].sort((a,b)=>(localDay(a['日期'])||0)-(localDay(b['日期'])||0));
+  const latest=metricRows.at(-1)||{}, previous=metricRows.at(-2)||{};
+  const monthlyIncome=state.income.filter(row=>{const d=localDay(row['日期']);return d&&d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth();}).reduce((sum,row)=>sum+numeric(row['已收金額']),0);
+  const cards=[
+    ['IG 粉絲','IG 粉絲','人'],['FB 粉絲','FB 粉絲','人'],['LINE 好友','LINE 好友','人'],['已收集見證','見證數','份'],['講座報名','講座報名','人']
+  ].map(([label,key,unit])=>{const value=numeric(latest[key]),prev=previous[key]===''||previous[key]==null?null:numeric(previous[key]);const delta=prev===null?'第一筆基準':`比上週 ${value-prev>=0?'+':''}${value-prev}`;return [label,value.toLocaleString('zh-TW'),unit,delta];});
+  cards.push(['本月已收營收',money(monthlyIncome),'','以實收金額計算']);
+  document.querySelector('#overview-metrics').innerHTML=cards.map(card=>`<article><span>${esc(card[0])}</span><strong>${esc(card[1])}<small>${esc(card[2])}</small></strong><p>${esc(card[3])}</p></article>`).join('');
+
+  const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));
+  const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);
+  const weekly=state.tasksNew.filter(task=>{const due=localDay(task['期限']);return due&&due>=monday&&due<=sunday&&task['狀態']!=='完成';}).sort((a,b)=>localDay(a['期限'])-localDay(b['期限'])).slice(0,5);
+  document.querySelector('#overview-weekly').innerHTML=weekly.length?weekly.map(task=>`<article class="overview-task"><span class="overview-status">${esc(task['狀態'])}</span><div><strong>${esc(task['待辦'])}</strong><small>${esc(task['工作線 id'])} · ${esc(task['負責人'])}</small></div><time>${dateLabel(task['期限'])}</time></article>`).join(''):'<div class="overview-empty"><strong>本週沒有到期事項</strong><span>可以把時間留給目前正在準備的工作。</span></div>';
+
+  const pending=state.decisionsNew.filter(item=>item['狀態']==='待決定').sort((a,b)=>{const ad=localDay(a['決定期限']),bd=localDay(b['決定期限']);return (ad?.getTime()||Infinity)-(bd?.getTime()||Infinity);}).slice(0,3);
+  document.querySelector('#overview-decisions').innerHTML=pending.length?pending.map(item=>`<article class="overview-decision"><div><strong>${esc(item['事項'])}</strong><small>${esc(item['選項'])}</small></div><span>${item['決定期限']?dateLabel(item['決定期限']):'待排期限'}</span><p>一起決定：${esc(item['一起決定的人']||'圈圈')}</p></article>`).join(''):'<div class="overview-empty"><strong>目前沒有待決定事項</strong></div>';
+
+  const schedule=Array.from({length:7},(_,index)=>{const date=new Date(today);date.setDate(today.getDate()+index);const key=localIso(date),rows=state.events.filter(event=>event['日期']===key);const hasAll=rows.some(event=>event['時段']==='全天'||event['類型']==='家庭日');const hasDayPart=rows.some(event=>['上午','下午'].includes(event['時段']));const isWeekday=date.getDay()>0&&date.getDay()<6;let availability='';if(!rows.length&&isWeekday)availability='可工作';else if(rows.length&&!hasAll&&hasDayPart)availability='半天空檔';else if(rows.length&&!hasAll&&rows.every(event=>event['時段']==='晚上'))availability='白天空檔';return {date,key,rows,availability};});
+  document.querySelector('#overview-schedule').innerHTML=schedule.map(day=>`<article class="schedule-day ${day.availability?'has-availability':''}"><header><span>${day.date.toLocaleDateString('zh-TW',{weekday:'short'})}</span><strong>${day.date.getMonth()+1}/${day.date.getDate()}</strong>${day.availability?`<b>${day.availability}</b>`:''}</header><div>${day.rows.length?day.rows.map(event=>`<p><i class="event-dot event-${esc(event['類型'])}"></i><span>${esc(event['標題'])}</span><small>${esc(event['時段'])}</small></p>`).join(''):'<p class="no-event">尚無行程</p>'}</div></article>`).join('');
+
+  const streams=[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序']));
+  document.querySelector('#overview-workstreams').innerHTML=streams.map(stream=>{const tasks=state.tasksNew.filter(task=>task['工作線 id']===stream.id),done=tasks.filter(task=>task['狀態']==='完成').length,progress=tasks.length?Math.round(done/tasks.length*100):0;return `<button type="button" data-workstream="${esc(stream.id)}"><header><span>${esc(stream.id)}</span><strong>${esc(stream['名稱'])}</strong><b>${progress}%</b></header><p>${esc(stream['3 月目標'])}</p><div><i style="width:${progress}%"></i></div><small>${done}／${tasks.length} 項完成</small></button>`;}).join('');
+}
 
 function showView(view) {
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('is-active',el.dataset.view===view));
+  document.querySelectorAll('.nav-item,.mobile-nav-item[data-view]').forEach(el => el.classList.toggle('is-active',el.dataset.view===view));
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('is-visible',el.dataset.viewPanel===view));
-  const titles={overview:'公司作戰總覽',tasks:'目標與全公司工作',revenue:'服務與營收損益',governance:'決策、會議與討論歷程',executives:'三位主管建議'};
+  const titles={overview:'總覽',tasks:'待辦',decisions:'待決定',calendar:'行事曆',metrics:'數字成效',finance:'收支',docs:'文件'};
   document.querySelector('#page-title').textContent=titles[view];
+  const more=document.querySelector('#mobile-more-menu');if(more){more.hidden=true;document.querySelector('#mobile-more-toggle')?.setAttribute('aria-expanded','false');}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -457,10 +544,11 @@ function applyData(data,source){
   state.progress=objects(s.progress?.values||[]); state.decisions=objects(s.decisions?.values||[]); state.meetings=objects(s.meetings?.values||[]);
   state.services=objects(s.services?.values||seed.services); state.income=objects(s.income?.values||seed.income); state.expenses=objects(s.expenses?.values||seed.expenses); state.costCategories=objects(s.costCategories?.values||seed.costCategories);
   state.strategies=objects(s.strategies?.values||seed.strategies); state.funnels=objects(s.funnels?.values||seed.funnels);
+  state.settings=objects(s.settings?.values||settingsSeed); state.workstreams=objects(s.workstreams?.values||workstreamsSeed); state.tasksNew=objects(s.tasksNew?.values||tasksNewSeed); state.decisionsNew=objects(s.decisionsNew?.values||decisionsNewSeed); state.events=objects(s.events?.values||eventsSeed); state.metrics=objects(s.metrics?.values||metricsSeed); state.docs=objects(s.docs?.values||docsSeed);
   document.querySelectorAll('[data-sheet-link]').forEach(a=>a.href=data.sourceUrl||'https://docs.google.com/spreadsheets/d/1omzCYbgnZ7uSJWlIjvbAaVBfv0no-GJzkLeInVKEx_c/edit');
   const stamp=new Date(data.generatedAt||Date.now()).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
   document.querySelector('#sync-time').textContent=`${source==='live'?'即時同步':'備援快照'}：${stamp}`; setSync(source==='live'?'live':'fallback',source==='live'?'已連線試算表':'使用備援快照');
-  renderGoals();renderKpis();renderInbox();renderWorkOverview();renderDaily();populateTaskFilters();renderTasks();renderRevenue();renderGovernance();renderExecutives();
+  renderOverview();renderGoals();renderKpis();renderInbox();renderWorkOverview();renderDaily();populateTaskFilters();renderTasks();renderRevenue();renderGovernance();renderExecutives();
 }
 
 async function syncData(){
@@ -472,8 +560,11 @@ async function syncData(){
 
 document.addEventListener('click',event=>{
   const close=event.target.closest('[data-close-dialog]'); if(close){close.closest('dialog')?.close();return;}
+  const moreToggle=event.target.closest('#mobile-more-toggle');if(moreToggle){const menu=document.querySelector('#mobile-more-menu'),opening=menu.hidden;menu.hidden=!opening;moreToggle.setAttribute('aria-expanded',String(opening));return;}
   const nav=event.target.closest('[data-view]'); if(nav)showView(nav.dataset.view);
   const jump=event.target.closest('[data-jump]'); if(jump)showView(jump.dataset.jump);
+  const overviewAdd=event.target.closest('#overview-add-item');if(overviewAdd)openInbox();
+  const stream=event.target.closest('[data-workstream]');if(stream){state.workCategory=stream.dataset.workstream;showView('tasks');}
   const project=event.target.closest('[data-project]'); if(project){state.project=project.dataset.project;renderTasks();}
   const cat=event.target.closest('[data-service-category]'); if(cat){state.serviceCategory=cat.dataset.serviceCategory;renderRevenue();}
   const funnel=event.target.closest('[data-funnel-service]'); if(funnel){state.funnelService=funnel.dataset.funnelService;renderFunnels();}

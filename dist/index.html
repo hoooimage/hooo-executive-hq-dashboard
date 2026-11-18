@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#bf2f70">
-  <meta name="description" content="HOOO AI Executive HQ｜公司目標、主管日報、專案、損益、決策與會議。">
+  <meta name="description" content="HOOO 好圈圈作戰儀表板｜準備期進度、待辦、待決定、行程、成效數字與收支。">
   <title>HOOO AI Executive HQ</title>
-  <link rel="stylesheet" href="./assets/styles.css?v=20261117-4">
+  <link rel="stylesheet" href="./assets/styles.css?v=20261119-1">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要內容</a>
@@ -17,11 +17,13 @@
         <div><small>好感・信任・連結</small><strong>Executive HQ</strong></div>
       </div>
       <nav class="nav-list" aria-label="主要導覽">
-        <button class="nav-item is-active" data-view="overview"><span>01</span>CEO 總覽</button>
-        <button class="nav-item" data-view="tasks"><span>02</span>目標與工作</button>
-        <button class="nav-item" data-view="revenue"><span>03</span>服務與營收</button>
-        <button class="nav-item" data-view="governance"><span>04</span>決策與會議</button>
-        <button class="nav-item" data-view="executives"><span>05</span>三位主管</button>
+        <button class="nav-item is-active" data-view="overview"><span>01</span>總覽</button>
+        <button class="nav-item" data-view="tasks"><span>02</span>待辦</button>
+        <button class="nav-item" data-view="decisions"><span>03</span>待決定</button>
+        <button class="nav-item" data-view="calendar"><span>04</span>行事曆</button>
+        <button class="nav-item" data-view="metrics"><span>05</span>數字成效</button>
+        <button class="nav-item" data-view="finance"><span>06</span>收支</button>
+        <button class="nav-item" data-view="docs"><span>07</span>文件</button>
       </nav>
       <div class="sidebar-foot">
         <p>資料只維護一份</p>
@@ -32,7 +34,7 @@
 
     <main id="main" class="main-panel">
       <header class="topbar">
-        <div><p class="eyebrow">HOOO CEO COMMAND CENTER</p><h1 id="page-title">公司作戰總覽</h1></div>
+        <div class="topbar-title"><p class="eyebrow">HOOO IMAGE｜好圈圈</p><h1 id="page-title">總覽</h1></div>
         <div class="top-actions">
           <span class="sync-state" id="sync-badge"><i></i><span>同步中</span></span>
           <button class="button primary" id="sync-now">同步最新資料</button>
@@ -41,60 +43,39 @@
       </header>
 
       <section class="view is-visible" data-view-panel="overview">
-        <section class="command-hero">
-          <div><p class="eyebrow">2026 BUILD · 2027 GROWTH</p><h2>先把公司建好，再穩定成長</h2><p>今年完成產品與營運基礎；明年用清楚的客戶、營收與品牌數字檢查成果。</p></div>
-          <div class="hero-actions"><button class="button light" id="add-inbox-item">＋ 新增今日事項</button><button class="button ghost" data-jump="tasks">查看完整作戰地圖</button></div>
+        <section class="overview-countdown" id="overview-countdown"></section>
+
+        <section class="overview-section overview-metrics-section">
+          <div class="overview-section-head"><div><p>目前數字</p><h2>關鍵成效</h2></div><button class="text-button" data-jump="metrics">查看趨勢</button></div>
+          <div id="overview-metrics" class="overview-metrics"></div>
         </section>
 
-        <section class="section-block brand-foundation-section">
-          <div class="section-head"><div><p class="eyebrow">BRAND FOUNDATION</p><h3>好圈圈為什麼存在</h3></div><span class="section-note">已由 CEO 確認</span></div>
-          <div id="brand-foundation-grid" class="brand-foundation-grid"></div>
-        </section>
-
-        <div id="north-star-banner" class="north-star-banner"></div>
-
-        <section class="section-block annual-section">
-          <div class="section-head"><div><p class="eyebrow">2027 ANNUAL OUTCOMES</p><h3>2027 一年要做到什麼</h3></div><span class="section-note">CEO 已確認的量化方向</span></div>
-          <div id="annual-goal-grid" class="annual-goal-grid"></div>
-        </section>
-
-        <section class="section-block build-section">
-          <div class="section-head"><div><p class="eyebrow">2026 BUILD PRIORITIES</p><h3>2026 年底前先完成什麼</h3></div><span class="section-note">目前公司的建置主戰場 · 截至 2026/12/31</span></div>
-          <div id="build-goal-grid" class="build-goal-grid"></div>
-        </section>
-
-        <div id="kpi-grid" class="kpi-grid command-kpis"></div>
-
-        <div class="two-column overview-focus">
-          <section class="panel">
-            <div class="section-head"><div><p class="eyebrow">90 / 30 DAY FOCUS</p><h3>中期與短期焦點</h3></div><button class="text-button" data-jump="tasks">查看全部目標</button></div>
-            <div id="focus-roadmap" class="focus-roadmap"></div>
+        <div class="overview-main-grid">
+          <section class="overview-card weekly-card">
+            <div class="overview-section-head"><div><p>THIS WEEK</p><h2>本週重點</h2></div><button class="text-button" data-jump="tasks">全部待辦</button></div>
+            <div id="overview-weekly" class="overview-list"></div>
           </section>
-          <section class="panel inbox-panel">
-            <div class="section-head"><div><p class="eyebrow">DAILY INBOX</p><h3>今日新增與待討論</h3></div><button class="small-button approve" id="add-inbox-item-small">＋ 新增</button></div>
-            <div id="inbox-list" class="inbox-list"></div>
+          <section class="overview-card decision-card">
+            <div class="overview-section-head"><div><p>NEED YOUR CALL</p><h2>待決定</h2></div><button class="text-button" data-jump="decisions">查看全部</button></div>
+            <div id="overview-decisions" class="overview-list"></div>
           </section>
         </div>
 
-        <section class="section-block">
-          <div class="section-head"><div><p class="eyebrow">COMPANY WORKLOAD</p><h3>全公司工作總覽</h3></div><button class="text-button" data-jump="tasks">打開工作板</button></div>
-          <div id="work-overview" class="work-overview"></div>
+        <section class="overview-card schedule-card">
+          <div class="overview-section-head"><div><p>NEXT 7 DAYS</p><h2>近期行程與空檔</h2></div><button class="text-button" data-jump="calendar">打開行事曆</button></div>
+          <div id="overview-schedule" class="overview-schedule"></div>
         </section>
 
-        <section class="section-block">
-          <div class="section-head"><div><p class="eyebrow">08:00 EXECUTIVE BRIEF</p><h3>三位主管今天要你看的重點</h3></div><button class="text-button" data-jump="executives">查看日報</button></div>
-          <div id="daily-grid" class="daily-grid"></div>
+        <section class="overview-section workstreams-section">
+          <div class="overview-section-head"><div><p>PREPARATION PLAN</p><h2>五條工作線</h2></div><span>完成待辦 ÷ 全部待辦</span></div>
+          <div id="overview-workstreams" class="overview-workstreams"></div>
         </section>
 
-        <div class="two-column">
-          <section class="panel">
-            <div class="section-head"><div><p class="eyebrow">CEO ACTIONS</p><h3>等待你確認</h3></div><span class="section-note">可確認、退回與補充說明</span></div>
-            <div id="decision-queue" class="action-list"></div>
-          </section>
-          <section class="panel">
-            <div class="section-head"><div><p class="eyebrow">LATEST MOVEMENT</p><h3>最新進度</h3></div><button class="text-button" data-jump="governance">查看歷程</button></div>
-            <div id="progress-feed" class="timeline"></div>
-          </section>
+        <div class="legacy-overview-data" hidden>
+          <button id="add-inbox-item" type="button"></button><button id="add-inbox-item-small" type="button"></button>
+          <div id="brand-foundation-grid"></div><div id="north-star-banner"></div><div id="annual-goal-grid"></div><div id="build-goal-grid"></div>
+          <div id="kpi-grid"></div><div id="focus-roadmap"></div><div id="inbox-list"></div><div id="work-overview"></div><div id="daily-grid"></div>
+          <div id="decision-queue"></div><div id="progress-feed"></div>
         </div>
       </section>
 
@@ -133,7 +114,21 @@
         </section>
       </section>
 
-      <section class="view" data-view-panel="revenue">
+      <section class="view phase-placeholder-view" data-view-panel="calendar">
+        <div class="phase-placeholder">
+          <span>第 3 階段</span><h2>行事曆</h2><p>未來 14 天、月曆切換與空檔指定功能會在下一階段完成；總覽已先顯示未來 7 天。</p>
+          <button class="button primary" data-jump="overview">回總覽看近期行程</button>
+        </div>
+      </section>
+
+      <section class="view phase-placeholder-view" data-view-panel="metrics">
+        <div class="phase-placeholder">
+          <span>第 4 階段</span><h2>數字成效</h2><p>每週數字表單與趨勢圖會在第 4 階段完成；總覽已先顯示最新基準數字。</p>
+          <button class="button primary" data-jump="overview">回總覽看關鍵數字</button>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="finance">
         <div class="intro-row">
           <div><p class="eyebrow">SERVICE & PROFIT</p><h2>收入、支出分開記，專案損益自動彙總。</h2></div>
           <div class="ledger-actions"><button class="button primary" id="add-income">＋ 新增收入</button><button class="button expense-button" id="add-expense">－ 新增支出</button></div>
@@ -185,7 +180,12 @@
         </section>
       </section>
 
-      <section class="view" data-view-panel="governance">
+      <section class="view" data-view-panel="decisions">
+        <div class="phase-placeholder compact-placeholder">
+          <span>第 3 階段</span><h2>待決定</h2><p>記錄決定、建立後續待辦與已決定紀錄會在下一階段完成；總覽已先列出最接近期限的 3 項。</p>
+          <button class="button primary" data-jump="overview">回總覽看待決定</button>
+        </div>
+        <div hidden>
         <div class="intro-row">
           <div><p class="eyebrow">DECISIONS & HISTORY</p><h2>從討論、決策到任務，都看得到承接。</h2></div>
           <p>每次對話與會議都保留摘要、決策 ID、任務 ID、目前狀態與下一步。</p>
@@ -204,9 +204,10 @@
           <div class="section-head"><div><p class="eyebrow">DISCUSSION PROGRESS</p><h3>所有討論的最新承接</h3></div><select id="history-project"><option value="">所有專案</option></select></div>
           <div id="history-list" class="history-list"></div>
         </section>
+        </div>
       </section>
 
-      <section class="view" data-view-panel="executives">
+      <section class="view" data-view-panel="executives" hidden aria-hidden="true">
         <div class="intro-row">
           <div><p class="eyebrow">EXECUTIVE DAILY</p><h2>先看今日重點，再看策略與漏斗。</h2></div>
           <p>每天上午 08:00 由三位主管提案；Alex 負責策略與商務排序，Sophie 負責九項服務漏斗，Daniel 負責進度承接。</p>
@@ -231,8 +232,26 @@
         </section>
       </section>
 
+      <section class="view phase-placeholder-view" data-view-panel="docs">
+        <div class="phase-placeholder">
+          <span>第 4 階段</span><h2>文件</h2><p>文件索引與更新日期會在第 4 階段完成；規劃文件已先整理進 Google Sheet 的 Docs 工作表。</p>
+          <a class="button primary" data-sheet-link target="_blank" rel="noopener">開啟 Google Sheet</a>
+        </div>
+      </section>
+
       <footer><span>HOOO AI Executive HQ</span><span>Google Sheet 是唯一正式資料源</span></footer>
     </main>
+
+    <nav class="mobile-nav" aria-label="手機版主要導覽">
+      <button class="mobile-nav-item is-active" data-view="overview"><span>⌂</span>總覽</button>
+      <button class="mobile-nav-item" data-view="tasks"><span>✓</span>待辦</button>
+      <button class="mobile-nav-item" data-view="decisions"><span>?</span>待決定</button>
+      <button class="mobile-nav-item" data-view="calendar"><span>□</span>行事曆</button>
+      <button class="mobile-nav-item" id="mobile-more-toggle" type="button" aria-expanded="false"><span>•••</span>更多</button>
+    </nav>
+    <div class="mobile-more-menu" id="mobile-more-menu" hidden>
+      <button data-view="metrics">數字成效</button><button data-view="finance">收支</button><button data-view="docs">文件</button>
+    </div>
   </div>
 
   <dialog id="action-dialog">
@@ -336,6 +355,6 @@
   <iframe id="write-target" name="write-target" hidden></iframe>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./assets/config.js"></script>
-  <script src="./assets/app.js?v=20261117-5" defer></script>
+  <script src="./assets/app.js?v=20261119-1" defer></script>
 </body>
 </html>
