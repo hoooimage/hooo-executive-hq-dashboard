@@ -242,7 +242,7 @@ function renderOverview() {
 function showView(view) {
   document.querySelectorAll('.nav-item,.mobile-nav-item[data-view]').forEach(el => el.classList.toggle('is-active',el.dataset.view===view));
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('is-visible',el.dataset.viewPanel===view));
-  const titles={overview:'總覽',tasks:'待辦',decisions:'待決定',calendar:'行事曆',metrics:'數字成效',finance:'收支',docs:'文件'};
+  const titles={overview:'總覽',tasks:'待辦',decisions:'待決定',calendar:'行事曆',metrics:'數字成效',finance:'收支',docs:'文件',coach:'陪跑紀錄'};
   document.querySelector('#page-title').textContent=titles[view];
   const more=document.querySelector('#mobile-more-menu');if(more){more.hidden=true;document.querySelector('#mobile-more-toggle')?.setAttribute('aria-expanded','false');}
   window.scrollTo({top:0,behavior:'smooth'});
@@ -670,7 +670,7 @@ document.addEventListener('click',event=>{
   const calendarMode=event.target.closest('[data-calendar-mode]');if(calendarMode){state.calendarMode=calendarMode.dataset.calendarMode;renderCalendar();}
   const calendarShift=event.target.closest('[data-calendar-shift]');if(calendarShift){state.calendarMonth=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth()+Number(calendarShift.dataset.calendarShift),1);renderCalendar();}
   const floating=event.target.closest('#floating-add');if(floating){const menu=document.querySelector('#quick-add-menu');menu.hidden=!menu.hidden;return;}
-  const quick=event.target.closest('[data-quick-add]');if(quick){document.querySelector('#quick-add-menu').hidden=true;({task:openTaskDialog,decision:()=>openDecisionDialog(null),event:()=>openEventDialog(),metrics:openMetricsDialog,income:()=>document.querySelector('#add-income').click(),expense:()=>document.querySelector('#add-expense').click()})[quick.dataset.quickAdd]?.();}
+  const quick=event.target.closest('[data-quick-add]');if(quick){document.querySelector('#quick-add-menu').hidden=true;({task:openTaskDialog,decision:()=>openDecisionDialog(null),event:()=>openEventDialog(),metrics:openMetricsDialog,income:()=>document.querySelector('#add-income').click(),expense:()=>document.querySelector('#add-expense').click(),coach:()=>{showView('coach');window.HOOOCoach?.startNew();}})[quick.dataset.quickAdd]?.();}
 });
 document.querySelector('#task-workstream-filter').addEventListener('change',event=>{state.taskWorkstream=event.target.value;renderTasks();});
 document.querySelector('#task-status-filter').addEventListener('change',event=>{state.taskStatus=event.target.value;renderTasks();});

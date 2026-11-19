@@ -6,7 +6,10 @@
   <meta name="theme-color" content="#bf2f70">
   <meta name="description" content="HOOO 好圈圈作戰儀表板｜準備期進度、待辦、待決定、行程、成效數字與收支。">
   <title>HOOO AI Executive HQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="./assets/styles.css?v=20261119-4">
+  <link rel="stylesheet" href="./assets/coach.css?v=20261119-1">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要內容</a>
@@ -24,6 +27,7 @@
         <button class="nav-item" data-view="metrics"><span>05</span>數字成效</button>
         <button class="nav-item" data-view="finance"><span>06</span>收支</button>
         <button class="nav-item" data-view="docs"><span>07</span>文件</button>
+        <button class="nav-item" data-view="coach"><span>08</span>陪跑紀錄</button>
       </nav>
       <div class="sidebar-foot">
         <p>資料只維護一份</p>
@@ -247,6 +251,70 @@
         </section>
       </section>
 
+      <section class="view coach-view" data-view-panel="coach">
+        <div class="coach-shell">
+          <header class="coach-hero">
+            <div><p class="coach-kicker">HOOO × AMO｜顧問內部工具</p><h2>陪跑紀錄</h2><p>每次陪跑留下一筆，慢慢長成可複製的款待教材。</p></div>
+            <span class="coach-private">僅限授權帳號</span>
+          </header>
+          <div class="coach-stats" id="coach-stats">
+            <article><strong>—</strong><span>本月陪跑</span></article><article><strong>—</strong><span>累計工具</span></article><article><strong>—</strong><span>累計案例</span></article>
+          </div>
+          <nav class="coach-tabs" aria-label="陪跑紀錄功能">
+            <button class="active" type="button" data-coach-tab="write">寫紀錄</button><button type="button" data-coach-tab="overview">紀錄總覽</button><button type="button" data-coach-tab="library">教材素材庫</button><button type="button" data-coach-tab="report">月報</button>
+          </nav>
+          <div class="coach-auth" id="coach-auth"><strong>正在讀取私人紀錄…</strong><span>會使用目前登入的 Google 帳號驗證。</span></div>
+
+          <div class="coach-panel active" data-coach-panel="write">
+            <section class="coach-card coach-followup" id="coach-last-followup" hidden></section>
+            <section class="coach-card">
+              <div class="coach-section-head"><div><span>約 20 分鐘完成</span><h3 id="coach-form-title">記錄本次陪跑</h3></div><b id="coach-draft-status">草稿會自動儲存</b></div>
+              <form id="coach-form" autocomplete="off">
+                <input type="hidden" name="id">
+                <div class="coach-grid">
+                  <label>客戶<input name="client" value="阿默蛋糕" required><small>預設阿默蛋糕，未來可改為其他企業客戶。</small></label>
+                  <label>陪跑日期 <em>必填</em><input type="date" name="date" required><small>可以補登任何過去日期。</small></label>
+                  <label>單位 <em>必填</em><span class="coach-inline"><select name="unit" id="coach-unit" required></select><button type="button" id="coach-add-unit">＋</button></span><small>門市、工廠、總部或教育訓練。</small></label>
+                  <label>時段 <em>必填</em><select name="period" required><option>全天</option><option>上午</option><option>下午</option></select><small>這次陪跑的主要時段。</small></label>
+                  <label>參與人員<input name="participants" placeholder="主管、員工姓名或人數"><small>不確定時可以留空。</small></label>
+                  <label class="span-2">本次主題 <em>必填</em><input name="topic" required placeholder="例如：結帳時的需求探詢"><small>用一句話說明今天主要練習什麼。</small></label>
+                </div>
+                <fieldset><legend>五步驟標籤 <em>必填，可複選</em></legend><p>這次內容屬於客戶好感體驗的哪一步？</p><div class="coach-checks" id="coach-step-checks"></div></fieldset>
+                <fieldset><legend>主題標籤</legend><p>方便之後快速搜尋與彙整。</p><div class="coach-checks" id="coach-topic-checks"></div><button class="coach-link" type="button" id="coach-add-topic">＋ 新增標籤</button></fieldset>
+                <div class="coach-long-fields">
+                  <label><b>1. 現場觀察</b><textarea name="observation" rows="3" placeholder="看到什麼現象、發生在什麼情境"></textarea></label>
+                  <label><b>2. 背後原因</b><textarea name="reason" rows="3" placeholder="是流程、習慣，還是不知道標準"></textarea></label>
+                  <label><b>3. 我用的方法</b><textarea name="method" rows="3" placeholder="話術、示範、演練、檢查表"></textarea></label>
+                  <label><b>4. 員工反應</b><textarea name="reaction" rows="3" placeholder="當下反應，以及和上次比的改變"></textarea></label>
+                </div>
+                <section class="coach-tools-editor"><div class="coach-tools-head"><div><b>5a. 可複製的工具</b><small>工具名稱＋操作步驟，可新增多個。</small></div><button class="coach-link" type="button" id="coach-add-tool">＋ 新增工具</button></div><div id="coach-tool-rows"></div></section>
+                <div class="coach-long-fields">
+                  <label><b>5b. 案例</b><textarea name="caseText" rows="3" placeholder="客人、情境、怎麼處理、結果；不寫客人真名"></textarea></label>
+                  <label><b>5c. 金句</b><input name="quote" placeholder="一句可以放進教材或講座的話"></label>
+                  <label><b>6. 本次精選記憶點</b><textarea name="memory" rows="3" placeholder="從門市工具挑 1–2 則最好的；目前請手動貼上"></textarea></label>
+                  <label><b>7. 下次追蹤</b><input name="followup" placeholder="下次陪跑要確認什麼"><small>下次選到同一單位時，會自動顯示。</small></label>
+                </div>
+                <div class="coach-form-actions"><button class="coach-secondary" type="button" id="coach-clear-draft">清除草稿</button><button class="coach-primary" type="submit" id="coach-save">儲存陪跑紀錄</button></div>
+              </form>
+            </section>
+          </div>
+
+          <div class="coach-panel" data-coach-panel="overview">
+            <section class="coach-card coach-filter-card"><div class="coach-filters"><label>月份<select id="coach-filter-month"></select></label><label>單位<select id="coach-filter-unit"></select></label><label>五步驟<select id="coach-filter-step"></select></label><label>補登<select id="coach-filter-backfill"><option value="">全部</option><option>是</option><option>否</option></select></label><label class="coach-search">關鍵字<input type="search" id="coach-filter-search" placeholder="搜尋主題、觀察、方法、案例"></label></div><div class="coach-import-actions"><button class="coach-secondary" type="button" id="coach-import-open">匯入過去紀錄</button><button class="coach-link" type="button" id="coach-template-download">下載 CSV 範本</button><button class="coach-link" type="button" id="coach-export-all">匯出全部紀錄</button></div></section>
+            <div class="coach-record-list" id="coach-record-list"></div>
+          </div>
+
+          <div class="coach-panel" data-coach-panel="library">
+            <section class="coach-card coach-library-toolbar"><div class="coach-step-tabs" id="coach-library-steps"></div><label class="coach-star-only"><input type="checkbox" id="coach-star-only">只看 ★ 收進教材</label></section>
+            <div id="coach-library"></div>
+          </div>
+
+          <div class="coach-panel" data-coach-panel="report">
+            <section class="coach-card"><div class="coach-report-head"><label>選擇月份<select id="coach-report-month"></select></label><div><button class="coach-secondary" type="button" id="coach-copy-report">一鍵複製</button><button class="coach-link" type="button" id="coach-export-report">下載 Markdown</button></div></div><textarea id="coach-report-text" class="coach-report-text" readonly></textarea></section>
+          </div>
+        </div>
+      </section>
+
       <footer><span>HOOO AI Executive HQ</span><span>Google Sheet 是唯一正式資料源</span></footer>
     </main>
 
@@ -258,10 +326,10 @@
       <button class="mobile-nav-item" id="mobile-more-toggle" type="button" aria-expanded="false"><span>•••</span>更多</button>
     </nav>
     <div class="mobile-more-menu" id="mobile-more-menu" hidden>
-      <button data-view="metrics">數字成效</button><button data-view="finance">收支</button><button data-view="docs">文件</button>
+      <button data-view="metrics">數字成效</button><button data-view="finance">收支</button><button data-view="docs">文件</button><button data-view="coach">陪跑紀錄</button>
     </div>
     <button class="floating-add" id="floating-add" type="button" aria-label="快速新增">＋</button>
-    <div class="quick-add-menu" id="quick-add-menu" hidden><button data-quick-add="task">新增待辦</button><button data-quick-add="decision">新增待決定</button><button data-quick-add="event">新增行程</button><button data-quick-add="metrics">新增本週數字</button><button data-quick-add="income">新增收入</button><button data-quick-add="expense">新增支出</button></div>
+    <div class="quick-add-menu" id="quick-add-menu" hidden><button data-quick-add="task">新增待辦</button><button data-quick-add="decision">新增待決定</button><button data-quick-add="event">新增行程</button><button data-quick-add="metrics">新增本週數字</button><button data-quick-add="income">新增收入</button><button data-quick-add="expense">新增支出</button><button data-quick-add="coach">新增陪跑紀錄</button></div>
   </div>
 
   <dialog id="task-dialog">
@@ -397,9 +465,20 @@
       <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">收進今日事項</button></div>
     </form>
   </dialog>
+  <dialog id="coach-import-dialog" class="coach-dialog">
+    <form id="coach-import-form">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="coach-kicker">PAST RECORDS</p><h3>匯入過去紀錄</h3>
+      <p class="dialog-context">可貼上 CSV，或選擇檔案。會先預覽，不會直接寫入。</p>
+      <label>CSV 檔案<input type="file" id="coach-csv-file" accept=".csv,text/csv"></label>
+      <label>或貼上 CSV<textarea id="coach-csv-text" rows="8" placeholder="第一列請放欄位名稱"></textarea></label>
+      <div id="coach-import-preview" class="coach-import-preview"></div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button secondary" type="button" id="coach-preview-import">預覽</button><button class="button primary" type="submit" id="coach-confirm-import" disabled>寫入試算表</button></div>
+    </form>
+  </dialog>
   <iframe id="write-target" name="write-target" hidden></iframe>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./assets/config.js"></script>
-  <script src="./assets/app.js?v=20261119-4" defer></script>
+  <script src="./assets/app.js?v=20261119-5" defer></script>
+  <script src="./assets/coach.js?v=20261119-1" defer></script>
 </body>
 </html>

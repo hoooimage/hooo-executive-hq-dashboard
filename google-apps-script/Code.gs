@@ -52,7 +52,35 @@ function jsonOutput_(payload, callback) {
 }
 
 function doGet(e) {
-  return jsonOutput_(buildPayload_(), String((e && e.parameter && e.parameter.callback) || ''));
+  const p = (e && e.parameter) || {};
+  const callback = String(p.callback || '');
+  if (String(p.scope || '') === 'coach') {
+    try {
+      const email = String(Session.getActiveUser().getEmail() || '').toLowerCase();
+      if (WRITE_ACCOUNTS.indexOf(email) < 0) throw new Error('這個 Google 帳號沒有陪跑紀錄讀取權限');
+      return jsonOutput_(buildCoachPayload_(email), callback);
+    } catch (error) {
+      return jsonOutput_({ ok: false, message: error.message || '私人資料讀取失敗' }, callback);
+    }
+  }
+  return jsonOutput_(buildPayload_(), callback);
+}
+
+function buildCoachPayload_(email) {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const ranges = {
+    coachLogs: { sheet: 'CoachLogs', columns: 22 },
+    coachTools: { sheet: 'CoachTools', columns: 14 }
+  };
+  const sheets = {};
+  Object.keys(ranges).forEach(function(key) {
+    const config = ranges[key], sheet = spreadsheet.getSheetByName(config.sheet);
+    if (!sheet) throw new Error('缺少 ' + config.sheet + ' 工作表');
+    const lastRow = Math.max(sheet.getLastRow(), 4);
+    const values = trimRows_(sheet.getRange(4, 1, lastRow - 3, config.columns).getDisplayValues());
+    sheets[key] = { range: "'" + config.sheet + "'!A4:" + columnLetter_(config.columns) + lastRow, values: values };
+  });
+  return { ok: true, generatedAt: new Date().toISOString(), account: email, sheets: sheets };
 }
 
 // 寫入端點必須另行部署為「以存取者身分執行」，並要求 Google 登入。
@@ -171,6 +199,33 @@ function applyAction_(p) {
     const result = syncSocialMetrics();
     return { ok: true, message: result.message };
   }
+  if (p.action === 'coachSave') {
+    const id = saveCoachLog_(spreadsheet, p);
+    return { ok: true, message: id + ' 陪跑紀錄已儲存' };
+  }
+  if (p.action === 'coachDelete') {
+    const id = String(p.id || '').trim(), logSheet = spreadsheet.getSheetByName('CoachLogs'), toolSheet = spreadsheet.getSheetByName('CoachTools');
+    const row = findIdRow_(logSheet, id, 1, 5);
+    logSheet.getRange(row, 22).setValue('已刪除');
+    logSheet.getRange(row, 19).setValue(nowText_());
+    if (toolSheet.getLastRow() >= 5) {
+      const rows = toolSheet.getRange(5, 2, toolSheet.getLastRow() - 4, 13).getDisplayValues();
+      rows.forEach(function(item, index) { if (String(item[0]).trim() === id) toolSheet.getRange(index + 5, 14).setValue('已刪除'); });
+    }
+    return { ok: true, message: id + ' 已移出總覽，原始資料仍保留' };
+  }
+  if (p.action === 'coachStar') {
+    const sheet = spreadsheet.getSheetByName('CoachTools'), id = String(p.id || '').trim(), row = findIdRow_(sheet, id, 1, 5), value = String(p.starred || '否') === '是' ? '是' : '否';
+    sheet.getRange(row, 10).setValue(value);sheet.getRange(row, 12).setValue(nowText_());
+    return { ok: true, message: value === '是' ? '已收進教材' : '已取消教材標記' };
+  }
+  if (p.action === 'coachImport') {
+    const records = safeJson_(p.recordsJson, []);
+    if (!Array.isArray(records) || !records.length) throw new Error('沒有可匯入的紀錄');
+    if (records.length > 100) throw new Error('單次最多匯入 100 筆');
+    const ids = records.map(function(record) { return saveCoachLog_(spreadsheet, record); });
+    return { ok: true, message: '已匯入 ' + ids.length + ' 筆陪跑紀錄' };
+  }
   if (p.action === 'decision') {
     const status = String(p.status || '');
     if (!['已生效', '需調整', '待CEO確認'].includes(status)) throw new Error('不允許的決策狀態');
@@ -257,6 +312,82 @@ function applyAction_(p) {
   }
   throw new Error('未知的操作');
 }
+
+function saveCoachLog_(spreadsheet, data) {
+  const logSheet = spreadsheet.getSheetByName('CoachLogs'), toolSheet = spreadsheet.getSheetByName('CoachTools');
+  if (!logSheet || !toolSheet) throw new Error('陪跑紀錄工作表尚未建立');
+  const email = String(Session.getActiveUser().getEmail() || '').toLowerCase();
+  const date = cleanDate_(data.date || data['陪跑日期']), unit = String(data.unit || data['單位'] || '').trim(), period = String(data.period || data['時段'] || '全天').trim(), topic = String(data.topic || data['本次主題'] || '').trim();
+  const steps = listParam_(data.stepsJson || data.steps || data['五步驟標籤']), topics = listParam_(data.topicsJson || data.topics || data['主題標籤']);
+  if (!date || !unit || !topic || !steps.length) throw new Error('請填寫日期、單位、本次主題與五步驟標籤');
+  if (['全天','上午','下午'].indexOf(period) < 0) throw new Error('不允許的陪跑時段');
+  const allowedSteps = ['被看見','被理解','被照顧','被交付','願意留下'];
+  if (steps.some(function(step) { return allowedSteps.indexOf(step) < 0; })) throw new Error('五步驟標籤不正確');
+  let id = String(data.id || '').trim(), row = 0, created = nowText_();
+  if (id) {
+    row = findIdRow_(logSheet, id, 1, 5);
+    created = String(logSheet.getRange(row, 18).getDisplayValue() || created);
+  } else {
+    row = Math.max(logSheet.getLastRow() + 1, 5);
+    id = nextId_(logSheet, 'CL-', 1, 5);
+  }
+  const today = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd');
+  const backfill = Math.floor((new Date(today + 'T00:00:00') - new Date(date + 'T00:00:00')) / 86400000) > 3 ? '是' : '否';
+  const values = [[
+    id, String(data.client || data['客戶'] || '阿默蛋糕'), date, unit, period,
+    String(data.participants || data['參與人員'] || ''), topic, steps.join('｜'), topics.join('｜'),
+    String(data.observation || data['現場觀察'] || ''), String(data.reason || data['背後原因'] || ''),
+    String(data.method || data['我用的方法'] || ''), String(data.reaction || data['員工反應'] || ''),
+    String(data.caseText || data['案例'] || ''), String(data.quote || data['金句'] || ''),
+    String(data.memory || data['本次精選記憶點'] || ''), String(data.followup || data['下次追蹤'] || ''),
+    created, nowText_(), backfill, email, '啟用'
+  ]];
+  logSheet.getRange(row, 1, 1, 22).setValues(values);
+  rebuildCoachMaterials_(toolSheet, id, values[0], toolsParam_(data.toolsJson || data.tools));
+  return id;
+}
+
+function rebuildCoachMaterials_(sheet, logId, log, tools) {
+  const starMap = {}, lastRow = sheet.getLastRow();
+  let nextNumber = 1;
+  if (lastRow >= 5) {
+    const rows = sheet.getRange(5, 1, lastRow - 4, 14).getDisplayValues();
+    rows.forEach(function(row, index) {
+      nextNumber = Math.max(nextNumber, (Number(String(row[0] || '').replace(/\D/g, '')) || 0) + 1);
+      if (String(row[1]).trim() !== logId || String(row[13]).trim() === '已刪除') return;
+      starMap[[row[5],row[6],row[7],row[8]].join('|')] = row[9] === '是' ? '是' : '否';
+      sheet.getRange(index + 5, 14).setValue('已刪除');
+    });
+  }
+  const client=log[1],date=log[2],unit=log[3],topic=log[6],steps=listParam_(log[7]),observation=log[9],reason=log[10],method=log[11],reaction=log[12],caseText=log[13],quote=log[14],memory=log[15],created=nowText_(),email=log[20];
+  const rows=[];
+  function add(step,type,name,content){content=String(content||'').trim();if(!content)return;const signature=[step,type,name,content].join('|'),materialId='CM-'+Utilities.formatString('%04d',nextNumber++);rows.push([materialId,logId,client,date,unit,step,type,name,content,starMap[signature]||'否',created,created,email,'啟用']);}
+  steps.forEach(function(step){
+    add(step,'常見問題',topic,[observation&&('現場觀察：'+observation),reason&&('背後原因：'+reason)].filter(Boolean).join('\n'));
+    tools.forEach(function(tool){add(step,'工具',String(tool.name||'').trim()||'未命名工具',String(tool.steps||'').trim());});
+    add(step,'案例',topic,[caseText&&('案例：'+caseText),memory&&('精選記憶點：'+memory)].filter(Boolean).join('\n'));
+    add(step,'金句',topic,quote);
+    add(step,'有效方法',topic,[method&&('方法：'+method),reaction&&('員工反應：'+reaction)].filter(Boolean).join('\n'));
+  });
+  if (rows.length) sheet.getRange(Math.max(sheet.getLastRow() + 1, 5), 1, rows.length, 14).setValues(rows);
+}
+
+function listParam_(value) {
+  if (Array.isArray(value)) return value.map(String).map(function(item){return item.trim();}).filter(Boolean);
+  const parsed = safeJson_(value, null);
+  if (Array.isArray(parsed)) return parsed.map(String).map(function(item){return item.trim();}).filter(Boolean);
+  return String(value || '').split(/[｜|、,]/).map(function(item){return item.trim();}).filter(Boolean);
+}
+
+function toolsParam_(value) {
+  if (Array.isArray(value)) return value;
+  const parsed = safeJson_(value, []);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function safeJson_(value, fallback) { try { return typeof value === 'string' ? JSON.parse(value) : value; } catch (error) { return fallback; } }
+function nowText_() { return Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss'); }
+function columnLetter_(number) { let value = '', current = number; while (current > 0) { current -= 1; value = String.fromCharCode(65 + current % 26) + value; current = Math.floor(current / 26); } return value; }
 
 function appendNewTask_(spreadsheet, data) {
   const title = String(data.title || '').trim(), workstreamId = String(data.workstreamId || '').trim(), status = validTaskStatus_(data.status), importance = validImportance_(data.importance);
