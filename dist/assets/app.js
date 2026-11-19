@@ -1,5 +1,5 @@
 const now = new Date();
-const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], settings:[], workstreams:[], tasksNew:[], decisionsNew:[], events:[], metrics:[], docs:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', taskWorkstream:'', taskStatus:'', taskDeadline:'all', calendarMode:'list', calendarMonth:new Date(now.getFullYear(),now.getMonth(),1), financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
+const state = { data:null, goals:[], brandFoundation:[], operatingMap:[], inbox:[], daily:[], tasks:[], progress:[], decisions:[], meetings:[], services:[], income:[], expenses:[], costCategories:[], strategies:[], funnels:[], settings:[], workstreams:[], tasksNew:[], decisionsNew:[], events:[], metrics:[], docs:[], syncing:false, project:'', serviceCategory:'', funnelService:'SVC-004', goalLevel:'2026建置目標', workGoal:'', workCategory:'', taskWorkstream:'', taskStatus:'', taskPriority:'', taskDeadline:'all', calendarMode:'list', calendarMonth:new Date(now.getFullYear(),now.getMonth(),1), financeMode:'month', financeYear:now.getFullYear(), financeMonth:now.getMonth()+1 };
 const LIVE_ENDPOINT = String(window.HOOO_DATA_ENDPOINT || '').trim();
 const WRITE_ENDPOINT = String(window.HOOO_WRITE_ENDPOINT || '').trim();
 
@@ -90,7 +90,7 @@ const operatingMapSeed = [
 ];
 
 const settingsSeed = [
-  ['key','value'],['倒數目標日','2027-03-01'],['月營收目標','250000'],['目標生效月','2027-03'],['阿默合約結束日','2027-03-31']
+  ['key','value'],['倒數目標日','2027-03-01'],['月營收目標','250000'],['目標生效月','2027-03'],['阿默合約結束日','2027-03-31'],['社群同步狀態','尚未執行'],['社群最後同步','']
 ];
 const workstreamsSeed = [
   ['id','名稱','說明','3 月目標','排序'],
@@ -101,7 +101,7 @@ const workstreamsSeed = [
   ['W5','內容與素材','','穩定發文、累積見證',5]
 ];
 const tasksNewSeed = [
-  ['id','待辦','工作線 id','負責人','期限','狀態','下一步','來源文件','建立日','完成日'],
+  ['id','待辦','工作線 id','負責人','期限','狀態','下一步','來源文件','建立日','完成日','重要程度'],
   ['T-030','第一次拍攝：官網形象照、現場照、短影音','W5','圈圈','2026-11-23','未開始','','','2026-11-18',''],
   ['T-031','IG、FB 簡介改為「讓每個圈子，都記得你的好」','W5','圈圈','2026-11-30','未開始','','','2026-11-18',''],
   ['T-032','課程頁年資改為「15 年以上」','W4','圈圈','2026-11-30','未開始','','','2026-11-18',''],
@@ -137,7 +137,7 @@ addEventSeed('2026-11-25','下午','高球','初階團班與教練課');addEvent
 ['2026-11-21','2026-11-24','2026-11-28','2026-12-05','2026-12-06','2026-12-12','2026-12-19','2026-12-20','2026-12-21'].forEach(date=>addEventSeed(date,'全天','家庭日','家庭日'));
 for(let t=Date.parse('2026-12-25T00:00:00Z');t<=Date.parse('2027-01-02T00:00:00Z');t+=86400000)addEventSeed(new Date(t).toISOString().slice(0,10),'全天','家庭日','泰國家庭旅行','泰國');
 addEventSeed('2026-11-22','下午','學習','財商課');addEventSeed('2026-11-22','上午','人脈交流','人脈交流');addEventSeed('2026-11-25','晚上','人脈交流','人脈交流');addEventSeed('2026-12-15','全天','其他工作','Lumina 助教');addEventSeed('2026-11-23','上午','個人事務','銀行開戶');addEventSeed('2026-12-16','晚上','個人事務','弄頭髮');
-const metricsSeed = [['日期','IG 粉絲','FB 粉絲','LINE 好友','講座報名','見證數','發文數','短影音數','備註'],['2026-11-18',479,598,127,0,0,'','','2026-11-18 基準值']];
+const metricsSeed = [['日期','IG 粉絲','FB 粉絲','LINE 好友','講座報名','見證數','發文數','短影音數','備註','Threads 粉絲'],['2026-11-18',479,598,127,0,0,'','','2026-11-18 基準值',122]];
 const docsSeed = [
   ['名稱','用途','連結','最後更新日'],['品牌定位','品牌故事、核心價值、客群','https://claude.ai/artifact/RZxRkREajmHfTtJ1NL8wKb',''],['網站優化建議','官網診斷與改版方向','https://claude.ai/artifact/9CuBL8TRgtwNfd3E6tF3jR',''],['網站建置指令','給 iDealFlow AI 執行','https://claude.ai/artifact/KLKKxfkWCFomgY95JGAbY7',''],['講座宣傳與內容規劃','貼文主題與短影音腳本','https://claude.ai/artifact/7DE1KuZudbcXkwV3377X7o',''],['準備期計畫','路線圖、兩場講座大綱','https://claude.ai/artifact/BcnhG1xuysy96YiTaxDiCF',''],['儀表板改版說明','本文件','https://claude.ai/artifact/8VE3QjVsp9CMHS1pNeK2zM','2026-11-18']
 ];
@@ -205,6 +205,9 @@ const dateLabel = value => {
 const localIso = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const localDay = value => { const d=parseDate(value); return d ? new Date(d.getFullYear(),d.getMonth(),d.getDate()) : null; };
 const settingValue = key => state.settings.find(item=>item.key===key)?.value || '';
+const taskPriorityOptions = ['重要且緊急','重要不緊急','緊急不重要','一般'];
+const taskPriorityRank = value => { const index=taskPriorityOptions.indexOf(value||'一般');return index<0?taskPriorityOptions.length:index; };
+const taskPriorityClass = value => `priority-${taskPriorityRank(value)+1}`;
 
 function renderOverview() {
   const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -216,15 +219,15 @@ function renderOverview() {
   const latest=metricRows.at(-1)||{}, previous=metricRows.at(-2)||{};
   const monthlyIncome=state.income.filter(row=>{const d=localDay(row['日期']);return d&&d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth();}).reduce((sum,row)=>sum+numeric(row['已收金額']),0);
   const cards=[
-    ['IG 粉絲','IG 粉絲','人'],['FB 粉絲','FB 粉絲','人'],['LINE 好友','LINE 好友','人'],['已收集見證','見證數','份'],['講座報名','講座報名','人']
+    ['IG 粉絲','IG 粉絲','人'],['FB 粉絲','FB 粉絲','人'],['Threads 粉絲','Threads 粉絲','人'],['LINE 好友','LINE 好友','人'],['已收集見證','見證數','份'],['講座報名','講座報名','人']
   ].map(([label,key,unit])=>{const value=numeric(latest[key]),prev=previous[key]===''||previous[key]==null?null:numeric(previous[key]);const delta=prev===null?'第一筆基準':`比上週 ${value-prev>=0?'+':''}${value-prev}`;return [label,value.toLocaleString('zh-TW'),unit,delta];});
   cards.push(['本月已收營收',money(monthlyIncome),'','以實收金額計算']);
   document.querySelector('#overview-metrics').innerHTML=cards.map(card=>`<article><span>${esc(card[0])}</span><strong>${esc(card[1])}<small>${esc(card[2])}</small></strong><p>${esc(card[3])}</p></article>`).join('');
 
   const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));
   const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);
-  const weekly=state.tasksNew.filter(task=>{const due=localDay(task['期限']);return due&&due>=monday&&due<=sunday&&task['狀態']!=='完成';}).sort((a,b)=>localDay(a['期限'])-localDay(b['期限'])).slice(0,5);
-  document.querySelector('#overview-weekly').innerHTML=weekly.length?weekly.map(task=>`<article class="overview-task"><span class="overview-status">${esc(task['狀態'])}</span><div><strong>${esc(task['待辦'])}</strong><small>${esc(task['工作線 id'])} · ${esc(task['負責人'])}</small></div><time>${dateLabel(task['期限'])}</time></article>`).join(''):'<div class="overview-empty"><strong>本週沒有到期事項</strong><span>可以把時間留給目前正在準備的工作。</span></div>';
+  const weekly=state.tasksNew.filter(task=>{const due=localDay(task['期限']);return due&&due>=monday&&due<=sunday&&task['狀態']!=='完成';}).sort((a,b)=>taskPriorityRank(a['重要程度'])-taskPriorityRank(b['重要程度'])||localDay(a['期限'])-localDay(b['期限'])).slice(0,5);
+  document.querySelector('#overview-weekly').innerHTML=weekly.length?weekly.map(task=>`<article class="overview-task"><span class="overview-status">${esc(task['狀態'])}</span><div><strong>${esc(task['待辦'])}</strong><small><b class="priority-badge ${taskPriorityClass(task['重要程度'])}">${esc(task['重要程度']||'一般')}</b>${esc(task['工作線 id'])} · ${esc(task['負責人'])}</small></div><time>${dateLabel(task['期限'])}</time><button class="icon-edit" type="button" data-edit-task="${esc(task.id)}" aria-label="編輯 ${esc(task['待辦'])}">編輯</button></article>`).join(''):'<div class="overview-empty"><strong>本週沒有到期事項</strong><span>點上方「新增」，設定本週期限後就會出現在這裡。</span></div>';
 
   const pending=state.decisionsNew.filter(item=>item['狀態']==='待決定').sort((a,b)=>{const ad=localDay(a['決定期限']),bd=localDay(b['決定期限']);return (ad?.getTime()||Infinity)-(bd?.getTime()||Infinity);}).slice(0,3);
   document.querySelector('#overview-decisions').innerHTML=pending.length?pending.map(item=>`<article class="overview-decision"><div><strong>${esc(item['事項'])}</strong><small>${esc(item['選項'])}</small></div><span>${item['決定期限']?dateLabel(item['決定期限']):'待排期限'}</span><p>一起決定：${esc(item['一起決定的人']||'圈圈')}</p></article>`).join(''):'<div class="overview-empty"><strong>目前沒有待決定事項</strong></div>';
@@ -330,24 +333,25 @@ function renderProgress() {
 }
 
 function populateTaskFilters() {
-  const workstream=document.querySelector('#task-workstream-filter'),status=document.querySelector('#task-status-filter');
+  const workstream=document.querySelector('#task-workstream-filter'),status=document.querySelector('#task-status-filter'),priority=document.querySelector('#task-priority-filter');
   workstream.innerHTML='<option value="">全部工作線</option>'+[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序'])).map(x=>`<option value="${esc(x.id)}">${esc(x.id)} · ${esc(x['名稱'])}</option>`).join('');
   status.innerHTML='<option value="">全部狀態</option>'+['未開始','進行中','等待中','完成'].map(x=>`<option>${x}</option>`).join('');
-  workstream.value=state.taskWorkstream;status.value=state.taskStatus;document.querySelector('#task-deadline-filter').value=state.taskDeadline;
+  priority.innerHTML='<option value="">全部重要程度</option>'+taskPriorityOptions.map(x=>`<option>${x}</option>`).join('');
+  workstream.value=state.taskWorkstream;status.value=state.taskStatus;priority.value=state.taskPriority;document.querySelector('#task-deadline-filter').value=state.taskDeadline;
   const workstreamOptions=[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序'])).map(x=>`<option value="${esc(x.id)}">${esc(x.id)} · ${esc(x['名稱'])}</option>`).join('');
   document.querySelector('#task-form-workstream').innerHTML=workstreamOptions;document.querySelector('#decision-followup-workstream').innerHTML=workstreamOptions;
 }
 
 function filteredNewTasks() {
   const today=localDay(new Date()),monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);const monthEnd=new Date(today.getFullYear(),today.getMonth()+1,0);
-  return state.tasksNew.filter(task=>{const due=localDay(task['期限']);if(state.taskWorkstream&&task['工作線 id']!==state.taskWorkstream)return false;if(state.taskStatus&&task['狀態']!==state.taskStatus)return false;if(state.taskDeadline==='week'&&(!due||due<monday||due>sunday))return false;if(state.taskDeadline==='month'&&(!due||due<today||due>monthEnd))return false;if(state.taskDeadline==='overdue'&&(!due||due>=today||task['狀態']==='完成'))return false;return true;}).sort((a,b)=>{const ad=localDay(a['期限']),bd=localDay(b['期限']);return (ad?.getTime()||Infinity)-(bd?.getTime()||Infinity);});
+  return state.tasksNew.filter(task=>{const due=localDay(task['期限']);if(state.taskWorkstream&&task['工作線 id']!==state.taskWorkstream)return false;if(state.taskStatus&&task['狀態']!==state.taskStatus)return false;if(state.taskPriority&&(task['重要程度']||'一般')!==state.taskPriority)return false;if(state.taskDeadline==='week'&&(!due||due<monday||due>sunday))return false;if(state.taskDeadline==='month'&&(!due||due<today||due>monthEnd))return false;if(state.taskDeadline==='overdue'&&(!due||due>=today||task['狀態']==='完成'))return false;return true;}).sort((a,b)=>{const priority=taskPriorityRank(a['重要程度'])-taskPriorityRank(b['重要程度']);if(priority)return priority;const ad=localDay(a['期限']),bd=localDay(b['期限']);return (ad?.getTime()||Infinity)-(bd?.getTime()||Infinity);});
 }
 
 function renderTasks(){
   const streams=[...state.workstreams].sort((a,b)=>numeric(a['排序'])-numeric(b['排序']));
   document.querySelector('#task-workstreams').innerHTML=streams.map(stream=>{const rows=state.tasksNew.filter(task=>task['工作線 id']===stream.id),done=rows.filter(task=>task['狀態']==='完成').length,pct=rows.length?Math.round(done/rows.length*100):0;return `<button type="button" data-task-stream="${esc(stream.id)}" class="${state.taskWorkstream===stream.id?'active':''}"><header><span>${esc(stream.id)}</span><strong>${esc(stream['名稱'])}</strong><b>${pct}%</b></header><p>${esc(stream['3 月目標'])}</p><div><i style="width:${pct}%"></i></div><small>${done} / ${rows.length} 項完成</small></button>`;}).join('');
   const rows=filteredNewTasks(),streamMap=Object.fromEntries(state.workstreams.map(s=>[s.id,s['名稱']])),today=localDay(new Date());document.querySelector('#task-count').textContent=`顯示 ${rows.length} 項，共 ${state.tasksNew.length} 項`;
-  document.querySelector('#task-list').innerHTML=rows.length?rows.map(task=>{const due=localDay(task['期限']),overdue=due&&due<today&&task['狀態']!=='完成';return `<article class="task-item ${overdue?'is-overdue':''}"><div class="task-item-main"><div class="task-item-meta"><span>${esc(task.id)}</span><b>${esc(task['工作線 id'])} · ${esc(streamMap[task['工作線 id']]||'')}</b>${overdue?'<em>已過期</em>':''}</div><h4>${esc(task['待辦'])}</h4><p>${esc(task['下一步']||'尚未填寫下一步')}</p>${task['來源文件']?`<a href="${esc(task['來源文件'])}" target="_blank" rel="noopener">來源文件 ↗</a>`:''}</div><div class="task-item-side"><label>狀態<select data-new-task-status="${esc(task.id)}" data-current-status="${esc(task['狀態'])}">${['未開始','進行中','等待中','完成'].map(status=>`<option ${task['狀態']===status?'selected':''}>${status}</option>`).join('')}</select></label><span>${esc(task['負責人']||'圈圈')}</span><time>${task['期限']?esc(task['期限']):'無固定期限'}</time></div></article>`;}).join(''):'<div class="overview-empty"><strong>沒有符合條件的待辦</strong><span>請調整篩選條件。</span></div>';
+  document.querySelector('#task-list').innerHTML=rows.length?rows.map(task=>{const due=localDay(task['期限']),overdue=due&&due<today&&task['狀態']!=='完成';return `<article class="task-item ${overdue?'is-overdue':''}"><div class="task-item-main"><div class="task-item-meta"><span>${esc(task.id)}</span><b>${esc(task['工作線 id'])} · ${esc(streamMap[task['工作線 id']]||'')}</b><em class="priority-badge ${taskPriorityClass(task['重要程度'])}">${esc(task['重要程度']||'一般')}</em>${overdue?'<em>已過期</em>':''}</div><h4>${esc(task['待辦'])}</h4><p>${esc(task['下一步']||'尚未填寫下一步')}</p>${task['來源文件']?`<a href="${esc(task['來源文件'])}" target="_blank" rel="noopener">來源文件 ↗</a>`:''}</div><div class="task-item-side"><label>狀態<select data-new-task-status="${esc(task.id)}" data-current-status="${esc(task['狀態'])}">${['未開始','進行中','等待中','完成'].map(status=>`<option ${task['狀態']===status?'selected':''}>${status}</option>`).join('')}</select></label><label>重要度<select data-new-task-priority="${esc(task.id)}" data-current-priority="${esc(task['重要程度']||'一般')}">${taskPriorityOptions.map(priority=>`<option ${priority===(task['重要程度']||'一般')?'selected':''}>${priority}</option>`).join('')}</select></label><span>${esc(task['負責人']||'圈圈')}</span><time>${task['期限']?esc(task['期限']):'無固定期限'}</time><button class="small-button" type="button" data-edit-task="${esc(task.id)}">編輯說明</button></div></article>`;}).join(''):'<div class="overview-empty"><strong>沒有符合條件的待辦</strong><span>請調整篩選條件。</span></div>';
 }
 
 function sortedMetrics() {
@@ -356,11 +360,13 @@ function sortedMetrics() {
 
 function renderMetrics() {
   const rows=sortedMetrics(),latest=rows.at(-1)||{},previous=rows.at(-2)||{};
-  const cards=[['IG 粉絲','IG 粉絲','人'],['FB 粉絲','FB 粉絲','人'],['LINE 好友','LINE 好友','人'],['講座報名','講座報名','人'],['見證數','見證數','份'],['本週發文','發文數','則'],['本週短影音','短影音數','支']];
+  const cards=[['IG 粉絲','IG 粉絲','人'],['FB 粉絲','FB 粉絲','人'],['Threads 粉絲','Threads 粉絲','人'],['LINE 好友','LINE 好友','人'],['講座報名','講座報名','人'],['見證數','見證數','份'],['本週發文','發文數','則'],['本週短影音','短影音數','支']];
   document.querySelector('#metrics-latest').innerHTML=cards.map(([label,key,unit])=>{const value=numeric(latest[key]),hasPrevious=previous[key]!==''&&previous[key]!=null,delta=value-numeric(previous[key]);return `<article><span>${esc(label)}</span><strong>${value.toLocaleString('zh-TW')}<small>${unit}</small></strong><p class="${hasPrevious&&delta<0?'negative':''}">${hasPrevious?`比上週 ${delta>=0?'+':''}${delta}`:'第一筆基準'}</p></article>`;}).join('');
+  const syncStatus=settingValue('社群同步狀態')||'尚未執行',syncTime=settingValue('社群最後同步');
+  document.querySelector('#social-sync-status').textContent=`${syncStatus}${syncTime?` · ${syncTime}`:''}；失敗時保留上次數字。`;
 
   if(!rows.length){document.querySelector('#metrics-chart').innerHTML='<div class="overview-empty"><strong>尚未有數字紀錄</strong><span>新增第一筆後就會產生趨勢圖。</span></div>';document.querySelector('#metrics-table').innerHTML='';return;}
-  const series=[['IG 粉絲','#bf2f70'],['FB 粉絲','#4f80b2'],['LINE 好友','#36745f']];
+  const series=[['IG 粉絲','#bf2f70'],['FB 粉絲','#4f80b2'],['Threads 粉絲','#222222'],['LINE 好友','#36745f']];
   const width=820,height=270,left=50,right=18,top=22,bottom=42,plotW=width-left-right,plotH=height-top-bottom;
   const max=Math.max(1,...rows.flatMap(row=>series.map(([key])=>numeric(row[key]))));
   const x=index=>left+(rows.length===1?plotW/2:index*plotW/(rows.length-1));
@@ -369,8 +375,8 @@ function renderMetrics() {
   const lines=series.map(([key,color])=>{const points=rows.map((row,index)=>`${x(index)},${y(row[key])}`).join(' ');const dots=rows.map((row,index)=>`<circle cx="${x(index)}" cy="${y(row[key])}" r="3.5"><title>${esc(row['日期'])}｜${esc(key)} ${numeric(row[key])}</title></circle>`).join('');return `<g class="metric-line" style="--line-color:${color}"><polyline points="${points}"/>${dots}</g>`;}).join('');
   const labelStep=Math.max(1,Math.ceil(rows.length/7));
   const labels=rows.map((row,index)=>(index%labelStep===0||index===rows.length-1)?`<text x="${x(index)}" y="${height-14}" text-anchor="middle">${dateLabel(row['日期'])}</text>`:'').join('');
-  document.querySelector('#metrics-chart').innerHTML=`<div class="metric-chart-legend">${series.map(([key,color])=>`<span><i style="background:${color}"></i>${key}</span>`).join('')}<b>最新：${esc(latest['日期']||'—')}</b></div><div class="metric-svg-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="IG、Facebook 與 LINE 好友的每週趨勢"><g class="metric-grid">${grid}</g>${lines}<g class="metric-axis-labels">${labels}</g></svg></div>`;
-  document.querySelector('#metrics-table').innerHTML=[...rows].reverse().map(row=>`<tr><td><strong>${esc(row['日期'])}</strong></td><td>${numeric(row['IG 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['FB 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['LINE 好友']).toLocaleString('zh-TW')}</td><td>${numeric(row['講座報名']).toLocaleString('zh-TW')}</td><td>${numeric(row['見證數']).toLocaleString('zh-TW')}</td><td>${numeric(row['發文數']).toLocaleString('zh-TW')}</td><td>${numeric(row['短影音數']).toLocaleString('zh-TW')}</td><td>${esc(row['備註']||'—')}</td></tr>`).join('');
+  document.querySelector('#metrics-chart').innerHTML=`<div class="metric-chart-legend">${series.map(([key,color])=>`<span><i style="background:${color}"></i>${key}</span>`).join('')}<b>最新：${esc(latest['日期']||'—')}</b></div><div class="metric-svg-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="IG、Facebook、Threads 與 LINE 好友的每週趨勢"><g class="metric-grid">${grid}</g>${lines}<g class="metric-axis-labels">${labels}</g></svg></div>`;
+  document.querySelector('#metrics-table').innerHTML=[...rows].reverse().map(row=>`<tr><td><strong>${esc(row['日期'])}</strong></td><td>${numeric(row['IG 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['FB 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['Threads 粉絲']).toLocaleString('zh-TW')}</td><td>${numeric(row['LINE 好友']).toLocaleString('zh-TW')}</td><td>${numeric(row['講座報名']).toLocaleString('zh-TW')}</td><td>${numeric(row['見證數']).toLocaleString('zh-TW')}</td><td>${numeric(row['發文數']).toLocaleString('zh-TW')}</td><td>${numeric(row['短影音數']).toLocaleString('zh-TW')}</td><td>${esc(row['備註']||'—')}</td></tr>`).join('');
 }
 
 function renderDocs() {
@@ -548,10 +554,10 @@ function renderCalendar(){
   const first=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth(),1),last=new Date(state.calendarMonth.getFullYear(),state.calendarMonth.getMonth()+1,0),start=new Date(first);start.setDate(first.getDate()-first.getDay());const end=new Date(last);end.setDate(last.getDate()+(6-last.getDay()));document.querySelector('#calendar-month-label').textContent=first.toLocaleDateString('zh-TW',{year:'numeric',month:'long'});root.className='calendar-month';root.innerHTML='<div class="calendar-weekdays">'+['日','一','二','三','四','五','六'].map(x=>`<span>${x}</span>`).join('')+'</div><div class="calendar-month-grid">'+Array.from({length:Math.round((end-start)/86400000)+1},(_,index)=>{const date=new Date(start);date.setDate(start.getDate()+index);return `<div class="${date.getMonth()===first.getMonth()?'':'outside-month'}">${calendarDayCard(date,true)}</div>`;}).join('')+'</div>';
 }
 
-function openTaskDialog(){const form=document.querySelector('#task-form');form.reset();form.elements.owner.value='圈圈';form.elements.status.value='未開始';form.elements.workstreamId.value=state.taskWorkstream||state.workstreams[0]?.id||'';document.querySelector('#task-dialog').showModal();}
+function openTaskDialog(task=null,options={}){const form=document.querySelector('#task-form');form.reset();const editing=Boolean(task);document.querySelector('#task-dialog-title').textContent=editing?'編輯待辦':options.weekly?'新增本週重點':'新增待辦';document.querySelector('#task-submit').textContent=editing?'儲存修改':'儲存待辦';form.elements.action.value=editing?'taskEdit':'taskNew';form.elements.id.value=task?.id||'';form.elements.title.value=task?.['待辦']||'';form.elements.owner.value=task?.['負責人']||'圈圈';form.elements.status.value=task?.['狀態']||'未開始';form.elements.importance.value=task?.['重要程度']||'一般';form.elements.workstreamId.value=task?.['工作線 id']||state.taskWorkstream||state.workstreams[0]?.id||'';form.elements.due.value=task?.['期限']||(options.weekly?localIso(new Date()):'');form.elements.next.value=task?.['下一步']||'';form.elements.source.value=task?.['來源文件']||'';document.querySelector('#task-dialog').showModal();}
 function openDecisionDialog(item){const form=document.querySelector('#decision-form');form.reset();const record=Boolean(item);document.querySelector('#decision-dialog-title').textContent=record?'記錄決定':'新增待決定';form.elements.action.value=record?'decisionRecord':'decisionNew';form.elements.id.value=item?.id||'';form.elements.title.value=item?.['事項']||'';form.elements.options.value=item?.['選項']||'';form.elements.people.value=item?.['一起決定的人']||'';form.elements.due.value=item?.['決定期限']||'';form.elements.decisionDate.value=localIso(new Date());form.elements.finalDecision.required=record;document.querySelectorAll('.decision-record-only').forEach(el=>el.hidden=!record);document.querySelectorAll('.followup-fields').forEach(el=>el.hidden=true);document.querySelector('#decision-dialog').showModal();}
 function openEventDialog(date='',vacancy=''){const form=document.querySelector('#event-form');form.reset();form.elements.date.value=date||localIso(new Date());form.elements.period.value=vacancy.includes('上午')?'上午':vacancy.includes('下午')?'下午':'全天';form.elements.type.value='其他工作';if(vacancy)form.elements.title.placeholder=`這段${vacancy}要安排什麼？`;document.querySelector('#event-dialog').showModal();}
-function openMetricsDialog(){const form=document.querySelector('#metrics-form'),latest=sortedMetrics().at(-1)||{};form.reset();form.elements.date.value=localIso(new Date());form.elements.ig.value=numeric(latest['IG 粉絲']);form.elements.fb.value=numeric(latest['FB 粉絲']);form.elements.line.value=numeric(latest['LINE 好友']);form.elements.registrations.value=numeric(latest['講座報名']);form.elements.testimonials.value=numeric(latest['見證數']);form.elements.posts.value=numeric(latest['發文數']);form.elements.videos.value=numeric(latest['短影音數']);document.querySelector('#metrics-dialog').showModal();}
+function openMetricsDialog(){const form=document.querySelector('#metrics-form'),latest=sortedMetrics().at(-1)||{};form.reset();form.elements.date.value=localIso(new Date());form.elements.ig.value=numeric(latest['IG 粉絲']);form.elements.fb.value=numeric(latest['FB 粉絲']);form.elements.threads.value=numeric(latest['Threads 粉絲']);form.elements.line.value=numeric(latest['LINE 好友']);form.elements.registrations.value=numeric(latest['講座報名']);form.elements.testimonials.value=numeric(latest['見證數']);form.elements.posts.value=numeric(latest['發文數']);form.elements.videos.value=numeric(latest['短影音數']);document.querySelector('#metrics-dialog').showModal();}
 
 function submitSimpleForm(event){event.preventDefault();const form=event.currentTarget,params=Object.fromEntries(new FormData(form).entries());if(postForm(params))form.closest('dialog').close();}
 function submitDecisionForm(event){event.preventDefault();const form=event.currentTarget,params=Object.fromEntries(new FormData(form).entries());params.createFollowup=form.elements.createFollowup.checked?'yes':'';if(postForm(params))form.closest('dialog').close();}
@@ -649,6 +655,8 @@ document.addEventListener('click',event=>{
   const nav=event.target.closest('[data-view]'); if(nav)showView(nav.dataset.view);
   const jump=event.target.closest('[data-jump]'); if(jump)showView(jump.dataset.jump);
   const overviewAdd=event.target.closest('#overview-add-item');if(overviewAdd)openInbox();
+  const weeklyAdd=event.target.closest('#add-weekly-focus');if(weeklyAdd)openTaskDialog(null,{weekly:true});
+  const editTask=event.target.closest('[data-edit-task]');if(editTask)openTaskDialog(state.tasksNew.find(task=>task.id===editTask.dataset.editTask)||null);
   const stream=event.target.closest('[data-workstream]');if(stream){state.taskWorkstream=stream.dataset.workstream;populateTaskFilters();renderTasks();showView('tasks');}
   const taskStream=event.target.closest('[data-task-stream]');if(taskStream){state.taskWorkstream=state.taskWorkstream===taskStream.dataset.taskStream?'':taskStream.dataset.taskStream;populateTaskFilters();renderTasks();}
   const cat=event.target.closest('[data-service-category]'); if(cat){state.serviceCategory=cat.dataset.serviceCategory;renderRevenue();}
@@ -666,16 +674,18 @@ document.addEventListener('click',event=>{
 });
 document.querySelector('#task-workstream-filter').addEventListener('change',event=>{state.taskWorkstream=event.target.value;renderTasks();});
 document.querySelector('#task-status-filter').addEventListener('change',event=>{state.taskStatus=event.target.value;renderTasks();});
+document.querySelector('#task-priority-filter').addEventListener('change',event=>{state.taskPriority=event.target.value;renderTasks();});
 document.querySelector('#task-deadline-filter').addEventListener('change',event=>{state.taskDeadline=event.target.value;renderTasks();});
-document.querySelector('#clear-task-filters').addEventListener('click',()=>{state.taskWorkstream='';state.taskStatus='';state.taskDeadline='all';populateTaskFilters();renderTasks();});
+document.querySelector('#clear-task-filters').addEventListener('click',()=>{state.taskWorkstream='';state.taskStatus='';state.taskPriority='';state.taskDeadline='all';populateTaskFilters();renderTasks();});
 document.querySelector('#sync-now').addEventListener('click',syncData);
+document.querySelector('#sync-social').addEventListener('click',()=>postForm({action:'socialSync'}));
 document.querySelector('#finance-year').addEventListener('change',event=>{state.financeYear=Number(event.target.value);renderRevenue();});
 document.querySelector('#finance-month').addEventListener('change',event=>{state.financeMonth=Number(event.target.value);renderRevenue();});
 document.querySelector('#add-income').addEventListener('click',()=>{const form=document.querySelector('#income-form');form.reset();form.elements.date.value=new Date().toISOString().slice(0,10);document.querySelector('#income-dialog').showModal();});
 document.querySelector('#add-expense').addEventListener('click',()=>{const form=document.querySelector('#expense-form');form.reset();form.elements.date.value=new Date().toISOString().slice(0,10);renderExpenseCategoryOptions();document.querySelector('#expense-dialog').showModal();});
 document.querySelector('#add-cost-category').addEventListener('click',()=>openCostCategory(null));
 ['add-inbox-item','add-inbox-item-small'].forEach(id=>document.querySelector('#'+id).addEventListener('click',openInbox));
-document.querySelector('#add-task').addEventListener('click',openTaskDialog);document.querySelector('#add-decision').addEventListener('click',()=>openDecisionDialog(null));document.querySelector('#add-event').addEventListener('click',()=>openEventDialog());
+document.querySelector('#add-task').addEventListener('click',()=>openTaskDialog());document.querySelector('#add-decision').addEventListener('click',()=>openDecisionDialog(null));document.querySelector('#add-event').addEventListener('click',()=>openEventDialog());
 document.querySelector('#add-metrics').addEventListener('click',openMetricsDialog);
 document.querySelector('#expense-cost-type').addEventListener('change',renderExpenseCategoryOptions);
 document.querySelector('#action-form').addEventListener('submit',submitAction);
@@ -687,7 +697,12 @@ document.querySelector('#task-form').addEventListener('submit',submitSimpleForm)
 document.querySelector('#metrics-form').addEventListener('submit',submitSimpleForm);
 document.querySelector('#decision-form').elements.createFollowup.addEventListener('change',event=>document.querySelectorAll('.followup-fields').forEach(el=>el.hidden=!event.target.checked));
 document.querySelector('#event-type').innerHTML=eventTypes.map(type=>`<option>${type}</option>`).join('');
-document.addEventListener('change',event=>{const select=event.target.closest('[data-new-task-status]');if(!select)return;const old=select.dataset.currentStatus,newStatus=select.value;if(!WRITE_ENDPOINT){select.value=old;showToast('網站寫入尚未啟用，請先到 Google Sheet 更新',false);return;}postForm({action:'taskNewStatus',id:select.dataset.newTaskStatus,status:newStatus});select.dataset.currentStatus=newStatus;});
+document.addEventListener('change',event=>{
+  const statusSelect=event.target.closest('[data-new-task-status]');
+  if(statusSelect){const old=statusSelect.dataset.currentStatus,newStatus=statusSelect.value;if(!WRITE_ENDPOINT){statusSelect.value=old;showToast('網站寫入尚未啟用，請先到 Google Sheet 更新',false);return;}postForm({action:'taskNewStatus',id:statusSelect.dataset.newTaskStatus,status:newStatus});statusSelect.dataset.currentStatus=newStatus;return;}
+  const prioritySelect=event.target.closest('[data-new-task-priority]');
+  if(prioritySelect){const old=prioritySelect.dataset.currentPriority,importance=prioritySelect.value;if(!WRITE_ENDPOINT){prioritySelect.value=old;showToast('網站寫入尚未啟用，請先到 Google Sheet 更新',false);return;}postForm({action:'taskPriority',id:prioritySelect.dataset.newTaskPriority,importance});prioritySelect.dataset.currentPriority=importance;}
+});
 function bindAmountCalculator(formId,paidName) {
   const form=document.querySelector(formId),recalculate=()=>{const qty=numeric(form.elements.quantity.value),price=numeric(form.elements.unitPrice.value);if(qty&&price)form.elements.amountDue.value=qty*price;};
   form.elements.quantity.addEventListener('input',recalculate);form.elements.unitPrice.addEventListener('input',recalculate);

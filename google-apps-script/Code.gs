@@ -20,10 +20,10 @@ const PUBLIC_RANGES = {
   brandFoundation: { range: "'品牌基礎'!A4:F1000", columns: [0,1,2,3,4,5] },
   settings: { range: "'Settings'!A4:B1000", columns: [0,1] },
   workstreams: { range: "'Workstreams'!A4:E1000", columns: [0,1,2,3,4] },
-  tasksNew: { range: "'Tasks'!A4:J1000", columns: [0,1,2,3,4,5,6,7,8,9] },
+  tasksNew: { range: "'Tasks'!A4:K1000", columns: [0,1,2,3,4,5,6,7,8,9,10] },
   decisionsNew: { range: "'Decisions'!A4:I1000", columns: [0,1,2,3,4,5,6,7,8] },
   events: { range: "'Events'!A4:G1000", columns: [0,1,2,3,4,5,6] },
-  metrics: { range: "'Metrics'!A4:I1000", columns: [0,1,2,3,4,5,6,7,8] },
+  metrics: { range: "'Metrics'!A4:J1000", columns: [0,1,2,3,4,5,6,7,8,9] },
   docs: { range: "'Docs'!A4:D1000", columns: [0,1,2,3] }
 };
 
@@ -83,18 +83,38 @@ function applyAction_(p) {
   if (p.action === 'taskNew') {
     const id = appendNewTask_(spreadsheet, {
       title: p.title, workstreamId: p.workstreamId, owner: p.owner, due: p.due,
-      status: p.status, next: p.next, source: p.source
+      status: p.status, next: p.next, source: p.source, importance: p.importance
     });
     return { ok: true, message: id + ' 已新增到待辦' };
   }
+  if (p.action === 'taskEdit') {
+    const sheet = spreadsheet.getSheetByName('Tasks');
+    const row = findIdRow_(sheet, String(p.id || ''), 1, 5);
+    const title = String(p.title || '').trim(), workstreamId = String(p.workstreamId || '').trim();
+    const status = validTaskStatus_(p.status), importance = validImportance_(p.importance);
+    if (!title || !workstreamId) throw new Error('請填寫待辦與工作線');
+    sheet.getRange(row, 2, 1, 7).setValues([[
+      title, workstreamId, String(p.owner || '圈圈'), cleanDate_(p.due), status,
+      String(p.next || ''), String(p.source || '')
+    ]]);
+    sheet.getRange(row, 10).setValue(status === '完成' ? Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd') : '');
+    sheet.getRange(row, 11).setValue(importance);
+    return { ok: true, message: String(p.id || '') + ' 已更新' };
+  }
   if (p.action === 'taskNewStatus') {
-    const status = String(p.status || '');
-    if (['未開始', '進行中', '等待中', '完成'].indexOf(status) < 0) throw new Error('不允許的待辦狀態');
+    const status = validTaskStatus_(p.status);
     const sheet = spreadsheet.getSheetByName('Tasks');
     const row = findIdRow_(sheet, String(p.id || ''), 1, 5);
     sheet.getRange(row, 6).setValue(status);
     sheet.getRange(row, 10).setValue(status === '完成' ? Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd') : '');
     return { ok: true, message: String(p.id || '') + ' 狀態已更新' };
+  }
+  if (p.action === 'taskPriority') {
+    const importance = validImportance_(p.importance);
+    const sheet = spreadsheet.getSheetByName('Tasks');
+    const row = findIdRow_(sheet, String(p.id || ''), 1, 5);
+    sheet.getRange(row, 11).setValue(importance);
+    return { ok: true, message: String(p.id || '') + ' 重要程度已更新' };
   }
   if (p.action === 'decisionNew') {
     const title = String(p.title || '').trim();
@@ -112,7 +132,7 @@ function applyAction_(p) {
     const row = findIdRow_(sheet, String(p.id || ''), 1, 5);
     let followupId = '';
     if (String(p.createFollowup || '') === 'yes') {
-      followupId = appendNewTask_(spreadsheet, { title: p.followupTitle || ('承接決定：' + String(p.title || '')), workstreamId: p.followupWorkstream, owner: '圈圈', due: p.followupDue, status: '未開始', next: '', source: String(p.id || '') });
+      followupId = appendNewTask_(spreadsheet, { title: p.followupTitle || ('承接決定：' + String(p.title || '')), workstreamId: p.followupWorkstream, owner: '圈圈', due: p.followupDue, status: '未開始', next: '', source: String(p.id || ''), importance: '一般' });
     }
     sheet.getRange(row, 6, 1, 4).setValues([['已決定', finalDecision, cleanDate_(p.decisionDate) || Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd'), followupId]]);
     return { ok: true, message: String(p.id || '') + ' 已記錄決定' + (followupId ? '，並建立 ' + followupId : '') };
@@ -140,12 +160,16 @@ function applyAction_(p) {
     }
     const updating = row > 0;
     if (!row) row = Math.max(lastRow + 1, 5);
-    sheet.getRange(row, 1, 1, 9).setValues([[
+    sheet.getRange(row, 1, 1, 10).setValues([[
       date, finiteNumber_(p.ig), finiteNumber_(p.fb), finiteNumber_(p.line),
       finiteNumber_(p.registrations), finiteNumber_(p.testimonials), finiteNumber_(p.posts),
-      finiteNumber_(p.videos), String(p.note || '')
+      finiteNumber_(p.videos), String(p.note || ''), finiteNumber_(p.threads)
     ]]);
     return { ok: true, message: date + (updating ? ' 的每週數字已更新' : ' 的每週數字已新增') };
+  }
+  if (p.action === 'socialSync') {
+    const result = syncSocialMetrics();
+    return { ok: true, message: result.message };
   }
   if (p.action === 'decision') {
     const status = String(p.status || '');
@@ -235,12 +259,134 @@ function applyAction_(p) {
 }
 
 function appendNewTask_(spreadsheet, data) {
-  const title = String(data.title || '').trim(), workstreamId = String(data.workstreamId || '').trim(), status = String(data.status || '未開始');
+  const title = String(data.title || '').trim(), workstreamId = String(data.workstreamId || '').trim(), status = validTaskStatus_(data.status), importance = validImportance_(data.importance);
   if (!title || !workstreamId) throw new Error('請填寫待辦與工作線');
-  if (['未開始', '進行中', '等待中', '完成'].indexOf(status) < 0) throw new Error('不允許的待辦狀態');
   const sheet = spreadsheet.getSheetByName('Tasks'), row = Math.max(sheet.getLastRow() + 1, 5), id = nextId_(sheet, 'T-', 1, 5), today = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd');
-  sheet.getRange(row, 1, 1, 10).setValues([[id, title, workstreamId, String(data.owner || '圈圈'), cleanDate_(data.due), status, String(data.next || ''), String(data.source || ''), today, status === '完成' ? today : '']]);
+  sheet.getRange(row, 1, 1, 11).setValues([[id, title, workstreamId, String(data.owner || '圈圈'), cleanDate_(data.due), status, String(data.next || ''), String(data.source || ''), today, status === '完成' ? today : '', importance]]);
   return id;
+}
+
+function validTaskStatus_(value) {
+  const status = String(value || '未開始');
+  if (['未開始', '進行中', '等待中', '完成'].indexOf(status) < 0) throw new Error('不允許的待辦狀態');
+  return status;
+}
+
+function validImportance_(value) {
+  const importance = String(value || '一般');
+  if (['重要且緊急', '重要不緊急', '緊急不重要', '一般'].indexOf(importance) < 0) throw new Error('不允許的重要程度');
+  return importance;
+}
+
+// 公開頁面的最佳努力同步；失敗時絕不覆寫已有數字。
+function syncSocialMetrics() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const settings = settingsMap_(spreadsheet);
+  const sheet = spreadsheet.getSheetByName('Metrics');
+  const previous = latestMetricValues_(sheet);
+  const sources = [
+    { key: 'ig', label: 'IG', url: settings.Instagram網址 || 'https://www.instagram.com/hooo.image/', pattern: 'instagram' },
+    { key: 'fb', label: 'FB', url: settings.Facebook網址 || 'https://www.facebook.com/hooo.image/', pattern: 'meta' },
+    { key: 'threads', label: 'Threads', url: settings.Threads網址 || 'https://www.threads.com/@hooo.image?hl=zh-tw', pattern: 'meta' }
+  ];
+  const values = { ig: previous.ig, fb: previous.fb, threads: previous.threads };
+  const messages = [];
+  sources.forEach(source => {
+    try {
+      const response = UrlFetchApp.fetch(source.url, {
+        muteHttpExceptions: true,
+        followRedirects: true,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/131 Safari/537.36',
+          'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8'
+        }
+      });
+      if (response.getResponseCode() < 200 || response.getResponseCode() >= 400) throw new Error('HTTP ' + response.getResponseCode());
+      const count = socialCountFromHtml_(response.getContentText(), source.pattern);
+      if (!(count > 0)) throw new Error('找不到粉絲數');
+      values[source.key] = count;
+      messages.push(source.label + ' ' + count.toLocaleString('en-US'));
+    } catch (error) {
+      messages.push(source.label + ' 保留 ' + Number(values[source.key] || 0).toLocaleString('en-US'));
+    }
+  });
+  const today = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd');
+  upsertSocialMetrics_(sheet, today, values, previous);
+  const timestamp = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss');
+  setSetting_(spreadsheet, '社群同步狀態', messages.join('｜'));
+  setSetting_(spreadsheet, '社群最後同步', timestamp);
+  return { ok: true, message: '社群數字已同步：' + messages.join('｜'), values: values, syncedAt: timestamp };
+}
+
+function installSocialSyncTrigger() {
+  ScriptApp.getProjectTriggers().filter(trigger => trigger.getHandlerFunction() === 'syncSocialMetrics').forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  ScriptApp.newTrigger('syncSocialMetrics').timeBased().atHour(8).everyDays(1).inTimezone('Asia/Taipei').create();
+  return '已建立每日早上 8 點社群數字同步';
+}
+
+function socialCountFromHtml_(html, kind) {
+  const text = decodeHtml_(String(html || ''));
+  let match;
+  if (kind === 'instagram') {
+    match = text.match(/"edge_followed_by"\s*:\s*\{\s*"count"\s*:\s*(\d+)/i) || text.match(/([\d,.]+\s*[KMB萬]?)\s+Followers/i);
+  } else {
+    match = text.match(/([\d,.]+\s*[KMB萬]?)\s*位粉絲/i) || text.match(/([\d,.]+\s*[KMB萬]?)\s+followers/i);
+  }
+  return match ? parseSocialNumber_(match[1]) : 0;
+}
+
+function decodeHtml_(text) {
+  return text.replace(/&quot;|&#34;/g, '"').replace(/&amp;|&#38;/g, '&').replace(/&#x([0-9a-f]+);/gi, function(_, hex) { return String.fromCharCode(parseInt(hex, 16)); }).replace(/&#(\d+);/g, function(_, dec) { return String.fromCharCode(Number(dec)); });
+}
+
+function parseSocialNumber_(value) {
+  const text = String(value || '').replace(/,/g, '').trim().toUpperCase();
+  const number = parseFloat(text);
+  if (!isFinite(number)) return 0;
+  if (text.endsWith('萬')) return Math.round(number * 10000);
+  if (text.endsWith('K')) return Math.round(number * 1000);
+  if (text.endsWith('M')) return Math.round(number * 1000000);
+  if (text.endsWith('B')) return Math.round(number * 1000000000);
+  return Math.round(number);
+}
+
+function latestMetricValues_(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 5) return { ig: 0, fb: 0, line: 0, registrations: 0, testimonials: 0, posts: 0, videos: 0, note: '', threads: 0 };
+  const row = sheet.getRange(lastRow, 1, 1, 10).getValues()[0];
+  return { ig: Number(row[1]) || 0, fb: Number(row[2]) || 0, line: Number(row[3]) || 0, registrations: Number(row[4]) || 0, testimonials: Number(row[5]) || 0, posts: Number(row[6]) || 0, videos: Number(row[7]) || 0, note: String(row[8] || ''), threads: Number(row[9]) || 0 };
+}
+
+function upsertSocialMetrics_(sheet, date, values, previous) {
+  const lastRow = sheet.getLastRow();
+  let row = 0;
+  if (lastRow >= 5) {
+    const dates = sheet.getRange(5, 1, lastRow - 4, 1).getDisplayValues();
+    const index = dates.findIndex(item => String(item[0] || '').trim() === date);
+    if (index >= 0) row = index + 5;
+  }
+  if (row) {
+    sheet.getRange(row, 2).setValue(values.ig);
+    sheet.getRange(row, 3).setValue(values.fb);
+    sheet.getRange(row, 10).setValue(values.threads);
+    return;
+  }
+  row = Math.max(lastRow + 1, 5);
+  sheet.getRange(row, 1, 1, 10).setValues([[date, values.ig, values.fb, previous.line, previous.registrations, previous.testimonials, previous.posts, previous.videos, '社群公開頁面自動同步', values.threads]]);
+}
+
+function settingsMap_(spreadsheet) {
+  const sheet = spreadsheet.getSheetByName('Settings'), lastRow = sheet.getLastRow();
+  const values = lastRow >= 5 ? sheet.getRange(5, 1, lastRow - 4, 2).getDisplayValues() : [];
+  return Object.fromEntries(values.filter(row => row[0]).map(row => [String(row[0]).trim(), String(row[1] || '').trim()]));
+}
+
+function setSetting_(spreadsheet, key, value) {
+  const sheet = spreadsheet.getSheetByName('Settings'), lastRow = sheet.getLastRow();
+  const values = lastRow >= 5 ? sheet.getRange(5, 1, lastRow - 4, 1).getDisplayValues() : [];
+  const index = values.findIndex(row => String(row[0] || '').trim() === key);
+  const row = index >= 0 ? index + 5 : Math.max(lastRow + 1, 5);
+  sheet.getRange(row, 1, 1, 2).setValues([[key, value]]);
 }
 
 function nextId_(sheet, prefix, column, startRow) {

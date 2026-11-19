@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#bf2f70">
   <meta name="description" content="HOOO 好圈圈作戰儀表板｜準備期進度、待辦、待決定、行程、成效數字與收支。">
   <title>HOOO AI Executive HQ</title>
-  <link rel="stylesheet" href="./assets/styles.css?v=20261119-3">
+  <link rel="stylesheet" href="./assets/styles.css?v=20261119-4">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要內容</a>
@@ -52,7 +52,8 @@
 
         <div class="overview-main-grid">
           <section class="overview-card weekly-card">
-            <div class="overview-section-head"><div><p>THIS WEEK</p><h2>本週重點</h2></div><button class="text-button" data-jump="tasks">全部待辦</button></div>
+            <div class="overview-section-head"><div><p>THIS WEEK</p><h2>本週重點</h2></div><div class="section-actions"><button class="small-button" id="add-weekly-focus">＋ 新增</button><button class="text-button" data-jump="tasks">全部待辦</button></div></div>
+            <p class="overview-source-note">來自待辦清單：期限在本週、且尚未完成的事項。</p>
             <div id="overview-weekly" class="overview-list"></div>
           </section>
           <section class="overview-card decision-card">
@@ -94,6 +95,7 @@
             <div class="filters">
               <select id="task-workstream-filter"><option value="">全部工作線</option></select>
               <select id="task-status-filter"><option value="">全部狀態</option></select>
+              <select id="task-priority-filter"><option value="">全部重要程度</option></select>
               <select id="task-deadline-filter"><option value="all">全部期限</option><option value="week">本週</option><option value="month">本月</option><option value="overdue">已過期</option></select>
             </div>
           </div>
@@ -120,16 +122,17 @@
       <section class="view" data-view-panel="metrics">
         <div class="intro-row">
           <div><p class="eyebrow">WEEKLY NUMBERS</p><h2>每週留下一筆，才看得見成長是不是正在發生。</h2></div>
-          <div class="ledger-actions"><button class="button primary" id="add-metrics">＋ 新增本週數字</button></div>
+          <div class="ledger-actions"><button class="button secondary" id="sync-social">更新 IG、FB、Threads</button><button class="button primary" id="add-metrics">＋ 新增本週數字</button></div>
         </div>
+        <section class="social-sync-card"><div><strong>社群粉絲每日自動同步</strong><span id="social-sync-status">尚未取得同步狀態</span></div><div class="social-links"><a href="https://www.instagram.com/hooo.image/" target="_blank" rel="noopener">IG ↗</a><a href="https://www.facebook.com/hooo.image/" target="_blank" rel="noopener">Facebook ↗</a><a href="https://www.threads.com/@hooo.image?hl=zh-tw" target="_blank" rel="noopener">Threads ↗</a></div></section>
         <div id="metrics-latest" class="metric-summary-grid"></div>
         <section class="panel metrics-chart-panel">
-          <div class="section-head"><div><p class="eyebrow">AUDIENCE TREND</p><h3>粉絲與 LINE 好友週趨勢</h3></div><span class="section-note">資料來自 Metrics 工作表</span></div>
+          <div class="section-head"><div><p class="eyebrow">AUDIENCE TREND</p><h3>社群粉絲與 LINE 好友週趨勢</h3></div><span class="section-note">資料來自 Metrics 工作表</span></div>
           <div id="metrics-chart" class="metrics-chart"></div>
         </section>
         <section class="panel metrics-history-panel">
           <div class="section-head"><div><p class="eyebrow">WEEKLY RECORDS</p><h3>每週紀錄</h3></div><span class="section-note">新到舊</span></div>
-          <div class="table-wrap"><table class="metrics-table"><thead><tr><th>日期</th><th>IG</th><th>Facebook</th><th>LINE</th><th>講座報名</th><th>見證</th><th>發文</th><th>短影音</th><th>備註</th></tr></thead><tbody id="metrics-table"></tbody></table></div>
+          <div class="table-wrap"><table class="metrics-table"><thead><tr><th>日期</th><th>IG</th><th>Facebook</th><th>Threads</th><th>LINE</th><th>講座報名</th><th>見證</th><th>發文</th><th>短影音</th><th>備註</th></tr></thead><tbody id="metrics-table"></tbody></table></div>
         </section>
       </section>
 
@@ -263,10 +266,10 @@
 
   <dialog id="task-dialog">
     <form id="task-form">
-      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">TASK</p><h3>新增待辦</h3>
-      <input type="hidden" name="action" value="taskNew">
-      <div class="form-grid"><label class="span-2">待辦<input name="title" required></label><label>工作線<select name="workstreamId" id="task-form-workstream" required></select></label><label>負責人<input name="owner" value="圈圈"></label><label>期限<input name="due" type="date"></label><label>狀態<select name="status"><option>未開始</option><option>進行中</option><option>等待中</option><option>完成</option></select></label><label class="span-2">下一步<input name="next"></label><label class="span-2">來源文件<input name="source"></label></div>
-      <p class="auth-note">儲存後寫入 Google Sheet 的 Tasks 工作表。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存待辦</button></div>
+      <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">TASK</p><h3 id="task-dialog-title">新增待辦</h3>
+      <input type="hidden" name="action" value="taskNew"><input type="hidden" name="id">
+      <div class="form-grid"><label class="span-2">待辦<input name="title" required></label><label>工作線<select name="workstreamId" id="task-form-workstream" required></select></label><label>負責人<input name="owner" value="圈圈"></label><label>期限<input name="due" type="date"></label><label>狀態<select name="status"><option>未開始</option><option>進行中</option><option>等待中</option><option>完成</option></select></label><label>重要程度<select name="importance"><option>重要且緊急</option><option>重要不緊急</option><option>緊急不重要</option><option selected>一般</option></select></label><label class="span-2">下一步<input name="next"></label><label class="span-2">來源文件<input name="source"></label></div>
+      <p class="auth-note">儲存後寫入 Google Sheet 的 Tasks 工作表。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" id="task-submit" type="submit">儲存待辦</button></div>
     </form>
   </dialog>
 
@@ -291,7 +294,7 @@
     <form id="metrics-form">
       <button class="dialog-close" type="button" data-close-dialog aria-label="關閉">×</button><p class="eyebrow">WEEKLY NUMBERS</p><h3>新增本週數字</h3><input type="hidden" name="action" value="metricNew">
       <p class="dialog-context">已帶入上一筆數字，只要修改本週有變動的欄位。</p>
-      <div class="form-grid"><label>日期<input name="date" type="date" required></label><label>IG 粉絲<input name="ig" type="number" min="0" required></label><label>FB 粉絲<input name="fb" type="number" min="0" required></label><label>LINE 好友<input name="line" type="number" min="0" required></label><label>講座報名<input name="registrations" type="number" min="0" required></label><label>見證數<input name="testimonials" type="number" min="0" required></label><label>本週發文數<input name="posts" type="number" min="0" required></label><label>本週短影音數<input name="videos" type="number" min="0" required></label><label class="span-2">備註<textarea name="note" rows="3"></textarea></label></div>
+      <div class="form-grid"><label>日期<input name="date" type="date" required></label><label>IG 粉絲<input name="ig" type="number" min="0" required></label><label>FB 粉絲<input name="fb" type="number" min="0" required></label><label>Threads 粉絲<input name="threads" type="number" min="0" required></label><label>LINE 好友<input name="line" type="number" min="0" required></label><label>講座報名<input name="registrations" type="number" min="0" required></label><label>見證數<input name="testimonials" type="number" min="0" required></label><label>本週發文數<input name="posts" type="number" min="0" required></label><label>本週短影音數<input name="videos" type="number" min="0" required></label><label class="span-2">備註<textarea name="note" rows="3"></textarea></label></div>
       <p class="auth-note">同一日期再次儲存時會更新該週，不會建立重複資料。</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>取消</button><button class="button primary" type="submit">儲存本週數字</button></div>
     </form>
   </dialog>
